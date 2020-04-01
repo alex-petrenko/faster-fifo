@@ -2,7 +2,16 @@ import multiprocessing
 from queue import Full, Empty
 from unittest import TestCase
 from faster_fifo import Queue
-from utils import log
+import logging
+
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
+
+log = logging.getLogger('rl')
+log.setLevel(logging.DEBUG)
+log.handlers = []  # No duplicated handlers
+log.propagate = False  # workaround for duplicated logs in ipython
+log.addHandler(ch)
 
 MSG_SIZE = 5
 

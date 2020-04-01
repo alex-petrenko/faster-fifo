@@ -16,9 +16,9 @@ setup(
     name='faster-fifo',
     version='0.0.1',
     url='https://github.com/alex-petrenko/faster-fifo',
-    author='Aleksei Petrenko',
+    author='Aleksei Petrenko & Tushar Kumar',
     license='MIT',
-    keywords='asynchronous ',
+    keywords='multiprocessing data structures',
 
     # Build instructions
     ext_modules=cythonize(extensions),
