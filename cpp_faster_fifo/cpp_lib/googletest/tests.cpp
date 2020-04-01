@@ -3,7 +3,7 @@
 
 #include "gtest/gtest.h"
 
-#include "fast_queue.hpp"
+#include "faster_fifo.hpp"
 
 
 TEST(fast_queue, queue_test) {

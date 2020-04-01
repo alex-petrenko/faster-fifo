@@ -6,7 +6,7 @@
 #include <pthread.h>
 #include <sys/time.h>
 
-#include "fast_queue.hpp"
+#include "faster_fifo.hpp"
 
 
 struct Queue {
