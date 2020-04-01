@@ -2,7 +2,7 @@
 # cython: boundscheck=False
 
 
-cdef extern from 'cpp_fast_queue/cpp_lib/fast_queue.hpp':
+cdef extern from 'cpp_faster_fifo/cpp_lib/faster_fifo.hpp':
     int Q_SUCCESS = 0, Q_EMPTY = -1, Q_FULL = -2, Q_MSG_BUFFER_TOO_SMALL = -3;
 
     size_t queue_object_size();

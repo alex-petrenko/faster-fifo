@@ -12,9 +12,9 @@ from queue import Full, Empty
 
 _ForkingPickler = context.reduction.ForkingPickler
 
-cimport fast_queue_def as Q
+cimport faster_fifo_def as Q
 
-from utils.utils import log
+from utils import log
 
 
 

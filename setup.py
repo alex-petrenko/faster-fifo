@@ -4,21 +4,21 @@ from setuptools import setup, Extension
 
 extensions = [
     Extension(
-        name='fast_queue',
-        sources=['fast_queue.pyx', 'cpp_fast_queue/cpp_lib/fast_queue.cpp'],
+        name='faster_fifo',
+        sources=['faster_fifo.pyx', 'cpp_faster_fifo/cpp_lib/faster_fifo.cpp'],
         language='c++',
-        include_dirs=['cpp_fast_queue/cpp_lib'],
+        include_dirs=['cpp_faster_fifo/cpp_lib'],
     ),
 ]
 
 setup(
     # Information
-    name='sample-factory',
+    name='faster-fifo',
     version='0.0.1',
-    url='https://github.com/alex-petrenko/sample-factory',
-    author='Aleksei Petrenko',
+    url='https://github.com/alex-petrenko/faster-fifo',
+    author='Aleksei Petrenko & Tushar Kumar',
     license='MIT',
-    keywords='asynchronous reinforcement learning policy gradient ppo impala',
+    keywords='multiprocessing data structures',
 
     # Build instructions
     ext_modules=cythonize(extensions),
