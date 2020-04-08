@@ -17,3 +17,5 @@ int queue_get(void *queue_obj, void *buffer,
               size_t max_messages_to_get, size_t max_bytes_to_get,
               size_t *messages_read, size_t *bytes_read, size_t *messages_size,
               int block, float timeout);
+
+size_t get_queue_size(void *queue_obj);

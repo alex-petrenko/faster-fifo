@@ -222,3 +222,8 @@ int queue_get(void *queue_obj, void *buffer,
     // we managed to read as many messages as we wanted and they all fit into the buffer!
     return status;
 }
+
+size_t get_queue_size(void *queue_obj) {
+    auto q = (Queue *)queue_obj;
+    return q->size;
+}

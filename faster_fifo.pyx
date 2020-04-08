@@ -14,9 +14,6 @@ _ForkingPickler = context.reduction.ForkingPickler
 
 cimport faster_fifo_def as Q
 
-from utils import log
-
-
 
 cpdef size_t q_addr(q):
     cdef size_t obj_buffer_ptr = ctypes.addressof(q.queue_obj_buffer)
@@ -154,6 +151,21 @@ class Queue:
         return messages
 
     def reallocate_msg_buffer(self, new_size):
-        log.info('Reallocating msg buffer size: %d', new_size)
+        # log.info('Reallocating msg buffer size: %d', new_size)
         self.message_buffer = (ctypes.c_ubyte * new_size)()
         self.message_buffer_memview = memoryview(self.message_buffer)
+
+    def qsize(self):
+        return Q.get_queue_size(<void *>q_addr(self))
+
+    def empty(self):
+        return Q.get_queue_size(<void *>q_addr(self)) == 0
+    
+    def full(self):
+        return Q.get_queue_size(<void *>q_addr(self)) == self.max_size_bytes
+
+    def join_thread(self):
+        return "This is not implemented as this implementation does not use a background thread"
+
+    def cancel_join_thread(self):
+        return "This is not implemented as this implementation does not use a background thread"    

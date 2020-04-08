@@ -90,3 +90,22 @@ class TestFastQueue(TestCase):
         q.put_nowait(py_obj)
         res = q.get_nowait()
         log.debug('Got object %r', res)
+
+    def test_queue_size(self):
+        q = Queue(max_size_bytes=1000)
+        py_obj = dict(a=42, b=33, c=(1, 2, 3), d=[1, 2, 3], e='123', f=b'kkk')
+        q.put_nowait(py_obj)
+        q_size = q.qsize()
+        log.debug('Got queue size %d', q_size)
+
+    def test_queue_empty(self):
+        q = Queue(max_size_bytes=1000)
+        q_empty = q.empty()
+        assert q_empty is True
+
+    def test_queue_full(self):
+        q = Queue(max_size_bytes=105)
+        py_obj = dict(a=42, b=33, c=(1, 2, 3), d=[1, 2, 3], e='123', f=b'kkk')
+        q.put_nowait(py_obj)
+        q_full = q.full()
+        assert q_full is True
