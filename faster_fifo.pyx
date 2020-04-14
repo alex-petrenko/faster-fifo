@@ -159,13 +159,26 @@ class Queue:
         return Q.get_queue_size(<void *>q_addr(self))
 
     def empty(self):
-        return Q.get_queue_size(<void *>q_addr(self)) == 0
+        """
+        Return True if the queue is empty, False otherwise. 
+        If empty() returns True it doesn’t guarantee that a subsequent call to put() will not block. 
+        Similarly, if empty() returns False it doesn’t guarantee that a subsequent call to get() will not block.
+        """
+        return self.qsize() == 0
     
     def full(self):
-        return Q.get_queue_size(<void *>q_addr(self)) == self.max_size_bytes
+        """
+        Return True if the queue is full, False otherwise. 
+        If full() returns True it doesn’t guarantee that a subsequent call to get() will not block. 
+        Similarly, if full() returns False it doesn’t guarantee that a subsequent call to put() will not block.
+        """
+        # return self.qsize() == self.max_size_bytes
+        pass
 
     def join_thread(self):
-        return "This is not implemented as this implementation does not use a background thread"
+        """This is not implemented as this implementation does not use a background thread"""
+        pass
 
     def cancel_join_thread(self):
-        return "This is not implemented as this implementation does not use a background thread"    
+        """This is not implemented as this implementation does not use a background thread"""
+        pass
