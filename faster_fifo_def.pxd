@@ -1,7 +1,6 @@
 # cython: language_level=3
 # cython: boundscheck=False
-
-
+from libcpp cimport bool
 cdef extern from 'cpp_faster_fifo/cpp_lib/faster_fifo.hpp':
     int Q_SUCCESS = 0, Q_EMPTY = -1, Q_FULL = -2, Q_MSG_BUFFER_TOO_SMALL = -3;
 
@@ -13,3 +12,5 @@ cdef extern from 'cpp_faster_fifo/cpp_lib/faster_fifo.hpp':
                   void *msg_buffer, size_t msg_buffer_size,
                   size_t max_messages_to_get, size_t max_bytes_to_get,
                   size_t *messages_read, size_t *bytes_read, size_t *messages_size, int block, float timeout);
+    size_t get_queue_size(void *queue_obj);
+    bool is_queue_full(void *queue_obj);

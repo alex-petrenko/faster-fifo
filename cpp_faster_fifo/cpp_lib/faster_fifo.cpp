@@ -80,6 +80,7 @@ struct Queue {
 public:
     size_t max_size_bytes;
     size_t head = 0, tail = 0, size = 0;
+    size_t num_elem = 0;
 
     pthread_mutexattr_t mutex_attr{};
     pthread_mutex_t mutex{};
@@ -164,7 +165,9 @@ int queue_put(void *queue_obj, void *buffer, void *msg_data, size_t msg_size, in
     q->circular_buffer_write((uint8_t *)buffer, (uint8_t *)msg_data, msg_size);
 
     pthread_cond_signal(&q->not_empty);
-
+    
+    // Increment count by one as one element has been added
+    ++q->num_elem;
     return Q_SUCCESS;
 }
 
@@ -209,6 +212,7 @@ int queue_get(void *queue_obj, void *buffer,
 
         *bytes_read += read_num_bytes;
         *messages_read += 1;
+        --q->num_elem;
 
         if (q->size <= 0) {
             // we want to read more messages, but the queue does not have any
@@ -221,4 +225,15 @@ int queue_get(void *queue_obj, void *buffer,
 
     // we managed to read as many messages as we wanted and they all fit into the buffer!
     return status;
+}
+
+size_t get_queue_size(void *queue_obj) {
+    auto q = (Queue *)queue_obj;
+    return q->num_elem;
+}
+
+bool is_queue_full(void *queue_obj) {
+    auto q = (Queue *)queue_obj;
+    constexpr size_t min_message_size = 1;
+    return !q->can_fit(min_message_size + sizeof(min_message_size));
 }

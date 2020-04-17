@@ -3,6 +3,7 @@ from queue import Full, Empty
 from unittest import TestCase
 from faster_fifo import Queue
 import logging
+import sys
 
 ch = logging.StreamHandler()
 ch.setLevel(logging.DEBUG)
@@ -90,3 +91,40 @@ class TestFastQueue(TestCase):
         q.put_nowait(py_obj)
         res = q.get_nowait()
         log.debug('Got object %r', res)
+        self.assertEqual(py_obj, res)
+
+    def test_queue_size(self):
+        q = Queue(max_size_bytes=1000)
+        py_obj_1 = dict(a=10, b=20)
+        py_obj_2 = dict(a=30, b=40)
+        q.put_nowait(py_obj_1)
+        q.put_nowait(py_obj_2)
+        q_size_bef = q.qsize()
+        log.debug('Queue size after put -  %d', q_size_bef)
+        # res = q.get_nowait()
+        num_messages = 0
+        want_to_read = 2
+        while num_messages < want_to_read:
+            msgs = q.get_many()
+            print(msgs)
+            num_messages += len(msgs)
+        self.assertEqual(type(q_size_bef), int)
+        q_size_af = q.qsize()
+        log.debug('Queue size after get -  %d', q_size_af)
+        self.assertEqual(q_size_af, 0)
+
+    def test_queue_empty(self):
+        q = Queue(max_size_bytes=1000)
+        self.assertTrue(q.empty())
+        py_obj = dict(a=42, b=33, c=(1, 2, 3), d=[1, 2, 3], e='123', f=b'kkk')
+        q.put_nowait(py_obj)
+        q_empty = q.empty()
+        self.assertFalse(q_empty)
+
+    def test_queue_full(self):
+        q = Queue(max_size_bytes=105)
+        self.assertFalse(q.full())
+        py_obj = dict(a=42, b=33, c=(1, 2, 3), d=[1, 2, 3], e='123', f=b'kkk')
+        q.put_nowait(py_obj)
+        self.assertTrue(q.full())
+
