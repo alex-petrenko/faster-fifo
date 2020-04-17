@@ -113,28 +113,18 @@ class TestFastQueue(TestCase):
         log.debug('Queue size after get -  %d', q_size_af)
         self.assertEqual(q_size_af, 0)
 
-    def test_queue_empty_true(self):
+    def test_queue_empty(self):
         q = Queue(max_size_bytes=1000)
-        q_empty = q.empty()
-        self.assertTrue(q_empty)
-
-    def test_queue_empty_false(self):
-        q = Queue(max_size_bytes=1000)
+        self.assertTrue(q.empty())
         py_obj = dict(a=42, b=33, c=(1, 2, 3), d=[1, 2, 3], e='123', f=b'kkk')
         q.put_nowait(py_obj)
         q_empty = q.empty()
         self.assertFalse(q_empty)
 
-    def test_queue_full_true(self):
+    def test_queue_full(self):
         q = Queue(max_size_bytes=105)
+        self.assertFalse(q.full())
         py_obj = dict(a=42, b=33, c=(1, 2, 3), d=[1, 2, 3], e='123', f=b'kkk')
         q.put_nowait(py_obj)
-        q_full = q.full()
-        self.assertTrue(q_full)
+        self.assertTrue(q.full())
 
-    def test_queue_full_false(self):
-        q = Queue(max_size_bytes=200)
-        py_obj = dict(a=42, b=33, c=(1, 2, 3), d=[1, 2, 3], e='123', f=b'kkk')
-        q.put_nowait(py_obj)
-        q_full = q.full()
-        self.assertFalse(q_full)
