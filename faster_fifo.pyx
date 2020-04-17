@@ -172,8 +172,7 @@ class Queue:
         If full() returns True it doesn’t guarantee that a subsequent call to get() will not block. 
         Similarly, if full() returns False it doesn’t guarantee that a subsequent call to put() will not block.
         """
-        # return self.qsize() == self.max_size_bytes
-        pass
+        return Q.is_queue_full(<void *>q_addr(self))
 
     def join_thread(self):
         """This is not implemented as this implementation does not use a background thread"""

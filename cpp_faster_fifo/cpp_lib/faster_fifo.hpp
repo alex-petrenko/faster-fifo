@@ -19,3 +19,5 @@ int queue_get(void *queue_obj, void *buffer,
               int block, float timeout);
 
 size_t get_queue_size(void *queue_obj);
+
+bool is_queue_full(void *queue_obj);

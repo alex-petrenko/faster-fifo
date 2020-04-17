@@ -167,7 +167,7 @@ int queue_put(void *queue_obj, void *buffer, void *msg_data, size_t msg_size, in
     pthread_cond_signal(&q->not_empty);
     
     // Increment count by one as one element has been added
-    q->num_elem += 1;
+    ++q->num_elem;
     return Q_SUCCESS;
 }
 
@@ -212,7 +212,7 @@ int queue_get(void *queue_obj, void *buffer,
 
         *bytes_read += read_num_bytes;
         *messages_read += 1;
-        q->num_elem -= 1;
+        --q->num_elem;
 
         if (q->size <= 0) {
             // we want to read more messages, but the queue does not have any
@@ -230,4 +230,10 @@ int queue_get(void *queue_obj, void *buffer,
 size_t get_queue_size(void *queue_obj) {
     auto q = (Queue *)queue_obj;
     return q->num_elem;
+}
+
+bool is_queue_full(void *queue_obj) {
+    auto q = (Queue *)queue_obj;
+    constexpr size_t min_message_size = 1;
+    return !q->can_fit(min_message_size);
 }
