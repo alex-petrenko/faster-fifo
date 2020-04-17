@@ -234,7 +234,6 @@ size_t get_queue_size(void *queue_obj) {
 
 bool is_queue_full(void *queue_obj) {
     auto q = (Queue *)queue_obj;
-    size_t msg_size;
     constexpr size_t min_message_size = 1;
-    return !q->can_fit(min_message_size + sizeof(msg_size));
+    return !q->can_fit(min_message_size + sizeof(min_message_size));
 }
