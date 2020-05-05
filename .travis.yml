@@ -1,0 +1,14 @@
+
+language: python
+python:
+  - "3.7"
+
+notifications:
+  email: false
+
+install:
+    - pip install -q cython
+    - python setup.py build_ext --inplace`
+
+script:
+  - pytest cpp_faster_fifo/tests/test_faster_fifo.py
