@@ -16,6 +16,7 @@ notifications:
 
 install:
     - pip install -q cython
+    - export CFLAGS='-std=c++11'
     - python setup.py build_ext --inplace
 
 script:
