@@ -9,7 +9,11 @@ notifications:
 
 install:
     - pip install -q cython
+    - pip install coverage
     - python setup.py build_ext --inplace
 
 script:
-  - pytest cpp_faster_fifo/tests/test_faster_fifo.py
+  - coverage run -m unittest cpp_faster_fifo/tests/test_faster_fifo.py
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
