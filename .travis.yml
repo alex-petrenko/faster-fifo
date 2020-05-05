@@ -3,14 +3,6 @@ language: python
 python:
   - "3.7"
 
-addons:
-  apt:
-    sources:
-    - ubuntu-toolchain-r-test
-  packages:
-    - gcc-7
-    - g++-7
-
 notifications:
   email: false
 
