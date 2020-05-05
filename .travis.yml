@@ -2,14 +2,14 @@
 language: python
 python:
   - "3.7"
-include:
-  - os: linux
-    compiler: gcc
-    addons:
-      apt:
-        sources: ['ubuntu-toolchain-r-test']
-        packages: ['g++-4.8']
-    env: COMPILER=g++-4.8
+
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+  packages:
+    - gcc-4.9
+    - g++-4.9
 
 notifications:
   email: false
