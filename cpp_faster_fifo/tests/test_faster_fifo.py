@@ -26,7 +26,7 @@ def produce(q, p_idx, num_messages):
     while i < num_messages:
         try:
             q.put(make_msg(i), timeout=0.01)
-            if i % 1000 == 0:
+            if i % 50000 == 0:
                 log.info('Produce: %d %d', i, p_idx)
             i += 1
         except Full:
@@ -44,7 +44,7 @@ def consume(q, p_idx, consume_many, total_num_messages=int(1e9)):
             msgs = q.get_many(timeout=0.01, max_messages_to_get=consume_many)
             for msg in msgs:
                 messages_received += 1
-                if msg[0] % 1000 == 0:
+                if msg[0] % 50000 == 0:
                     log.info('Consume: %r %d num_msgs: %d', msg, p_idx, len(msgs))
             if messages_received >= total_num_messages:
                 break
