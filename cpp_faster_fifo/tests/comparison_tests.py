@@ -1,12 +1,16 @@
-import multiprocessing
-from unittest import TestCase
-from faster_fifo import Queue
-from time import time
-from queue import Full, Empty
 import logging
+import multiprocessing
+from queue import Full, Empty
+from time import time
+from unittest import TestCase
+
+from faster_fifo import Queue
 
 ch = logging.StreamHandler()
 ch.setLevel(logging.DEBUG)
+
+fmt = logging.Formatter('[%(asctime)s][%(process)05d] %(message)s')
+ch.setFormatter(fmt)
 
 log = logging.getLogger('rl')
 log.setLevel(logging.DEBUG)
@@ -26,36 +30,44 @@ def produce_msgs(q, p_idx, num_messages):
     while i < num_messages:
         try:
             q.put(make_msg(i), timeout=0.01)
-            if i % 100000 == 0:
+            if i % 50000 == 0:
                 log.info('Produce: %d %d', i, p_idx)
             i += 1
         except Full:
             pass
         except Exception as exc:
             log.exception(exc)
-    log.info('Done producing! %d', p_idx)
 
 
 def consume_msgs(q, p_idx, consume_many=1):
+    num_received = 0
+
     while True:
         try:
             if consume_many == 1:
-                msg = q.get()
+                msg = q.get(timeout=0.01)
                 msgs = [msg]
             else:
-                msgs = q.get_many(max_messages_to_get=consume_many)
+                msgs = q.get_many(timeout=0.01, max_messages_to_get=10)
+
             if any(m is None for m in msgs):
                 break
+
+            for msg in msgs:
+                if msg[0] % 50000 == 0:
+                    log.info('Consume: %r %d num_msgs: %d total received: %d', msg, p_idx, len(msgs), num_received)
+                num_received += 1
+
         except Empty:
             pass
         except Exception as exc:
             log.exception(exc)
-    log.info('Done consuming! %d', p_idx)
 
 
-def process_prod_and_cons(queue_cls, num_producers, num_consumers, msgs_per_prod, consume_many=1):
+def run_test(queue_cls, num_producers, num_consumers, msgs_per_prod, consume_many):
     start_time = time()
     q = queue_cls(20000000)
+
     producers = []
     consumers = []
     for j in range(num_producers):
@@ -83,87 +95,37 @@ def process_prod_and_cons(queue_cls, num_producers, num_consumers, msgs_per_prod
 
 
 class ComparisonTestCase(TestCase):
-
-    def test_one_prod_to_one_cons(self):
-        time_ff = process_prod_and_cons(Queue, num_producers=1, num_consumers=1, msgs_per_prod=500000,
-                                        consume_many=1)
-        time_mp = process_prod_and_cons(multiprocessing.Queue, num_producers=1, num_consumers=1,
-                                        msgs_per_prod=500000, consume_many=1)
+    def comparison(self, n_prod, n_con, n_msgs):
+        n_msgs += 1  # +1 here to make sure the last log line will be printed
+        time_ff = run_test(Queue, num_producers=n_prod, num_consumers=n_con, msgs_per_prod=n_msgs, consume_many=1)
+        time_ff_many = run_test(Queue, num_producers=n_prod, num_consumers=n_con, msgs_per_prod=n_msgs, consume_many=100)
+        time_mp = run_test(multiprocessing.Queue, num_producers=n_prod, num_consumers=n_con, msgs_per_prod=n_msgs, consume_many=1)
         self.assertLess(time_ff, time_mp)
-
-    def test_one_prod_to_ten_cons(self):
-        time_ff = process_prod_and_cons(Queue, num_producers=1, num_consumers=10, msgs_per_prod=500000,
-                                        consume_many=1)
-        time_mp = process_prod_and_cons(multiprocessing.Queue, num_producers=1, num_consumers=10, msgs_per_prod=500000,
-                                        consume_many=1)
-        self.assertLess(time_ff, time_mp)
-
-    def test_ten_prod_to_one_cons(self):
-        time_ff = process_prod_and_cons(Queue, num_producers=10, num_consumers=1, msgs_per_prod=50000,
-                                        consume_many=1)
-        time_mp = process_prod_and_cons(multiprocessing.Queue, num_producers=10, num_consumers=1, msgs_per_prod=50000,
-                                        consume_many=1)
-        self.assertLess(time_ff, time_mp)
-
-    def test_three_prod_to_twenty_cons(self):
-        time_ff = process_prod_and_cons(Queue, num_producers=3, num_consumers=20, msgs_per_prod=100000,
-                                        consume_many=1)
-        time_mp = process_prod_and_cons(multiprocessing.Queue, num_producers=3, num_consumers=20, msgs_per_prod=100000,
-                                        consume_many=1)
-        self.assertLess(time_ff, time_mp)
-
-    def test_twenty_prod_to_three_cons(self):
-        time_ff = process_prod_and_cons(Queue, num_producers=20, num_consumers=3, msgs_per_prod=25000,
-                                        consume_many=1)
-        time_mp = process_prod_and_cons(multiprocessing.Queue, num_producers=20, num_consumers=3, msgs_per_prod=25000,
-                                        consume_many=1)
-        self.assertLess(time_ff, time_mp)
-
-    def test_twenty_prod_to_twenty_cons(self):
-        time_ff = process_prod_and_cons(Queue, num_producers=20, num_consumers=20, msgs_per_prod=25000,
-                                        consume_many=1)
-        time_mp = process_prod_and_cons(multiprocessing.Queue, num_producers=20, num_consumers=20, msgs_per_prod=25000,
-                                        consume_many=1)
-        self.assertLess(time_ff, time_mp)
-
-    def test_one_prod_to_one_cons_consume_multiple(self):
-        time_ff_many = process_prod_and_cons(Queue, num_producers=1, num_consumers=1, msgs_per_prod=500000,
-                                             consume_many=100)
-        time_mp = process_prod_and_cons(multiprocessing.Queue, num_producers=1, num_consumers=1, msgs_per_prod=500000,
-                                        consume_many=1)
         self.assertLess(time_ff_many, time_mp)
+        return time_ff, time_ff_many, time_mp
 
-    def test_one_prod_to_ten_cons_consume_multiple(self):
-        time_ff_many = process_prod_and_cons(Queue, num_producers=1, num_consumers=10, msgs_per_prod=500000,
-                                             consume_many=100)
-        time_mp = process_prod_and_cons(multiprocessing.Queue, num_producers=1, num_consumers=10, msgs_per_prod=500000,
-                                        consume_many=1)
-        self.assertLess(time_ff_many, time_mp)
+    def test_all_configurations(self):
+        configurations = (
+            (1, 1, 200000),
+            (1, 10, 200000),
+            (10, 1, 100000),
+            (3, 20, 100000),
+            (20, 3, 50000),
+            (20, 20, 50000),
+        )
 
-    def test_ten_prod_to_one_cons_consume_multiple(self):
-        time_ff_many = process_prod_and_cons(Queue, num_producers=10, num_consumers=1, msgs_per_prod=50000,
-                                             consume_many=100)
-        time_mp = process_prod_and_cons(multiprocessing.Queue, num_producers=10, num_consumers=1, msgs_per_prod=50000,
-                                        consume_many=1)
-        self.assertLess(time_ff_many, time_mp)
+        results = []
+        for c in configurations:
+            results.append(self.comparison(*c))
 
-    def test_three_prod_to_twenty_cons_consume_multiple(self):
-        time_ff_many = process_prod_and_cons(Queue, num_producers=3, num_consumers=20, msgs_per_prod=100000,
-                                             consume_many=100)
-        time_mp = process_prod_and_cons(multiprocessing.Queue, num_producers=3, num_consumers=20, msgs_per_prod=100000,
-                                        consume_many=1)
-        self.assertLess(time_ff_many, time_mp)
+        log.info('\nResults:\n')
+        for c, r in zip(configurations, results):
+            log.info('Configuration %r, timing [ff: %.2fs, ff_many: %.2fs, mp.queue: %.2fs]', c, *r)
 
-    def test_twenty_prod_to_three_cons_consume_multiple(self):
-        time_ff_many = process_prod_and_cons(Queue, num_producers=20, num_consumers=3, msgs_per_prod=25000,
-                                             consume_many=100)
-        time_mp = process_prod_and_cons(multiprocessing.Queue, num_producers=20, num_consumers=3, msgs_per_prod=25000,
-                                        consume_many=1)
-        self.assertLess(time_ff_many, time_mp)
 
-    def test_twenty_prod_to_twenty_cons_consume_multiple(self):
-        time_ff_many = process_prod_and_cons(Queue, num_producers=20, num_consumers=20, msgs_per_prod=25000,
-                                             consume_many=100)
-        time_mp = process_prod_and_cons(multiprocessing.Queue, num_producers=20, num_consumers=20, msgs_per_prod=25000,
-                                        consume_many=1)
-        self.assertLess(time_ff_many, time_mp)
+# [2020-05-16 03:24:26,548][30412] Configuration (1, 1, 200000), timing [ff: 0.92s, ff_many: 0.93s, mp.queue: 2.83s]
+# [2020-05-16 03:24:26,548][30412] Configuration (1, 10, 200000), timing [ff: 1.43s, ff_many: 1.40s, mp.queue: 7.60s]
+# [2020-05-16 03:24:26,548][30412] Configuration (10, 1, 100000), timing [ff: 4.95s, ff_many: 1.40s, mp.queue: 12.24s]
+# [2020-05-16 03:24:26,548][30412] Configuration (3, 20, 100000), timing [ff: 2.29s, ff_many: 2.25s, mp.queue: 13.25s]
+# [2020-05-16 03:24:26,548][30412] Configuration (20, 3, 50000), timing [ff: 3.19s, ff_many: 1.12s, mp.queue: 29.07s]
+# [2020-05-16 03:24:26,548][30412] Configuration (20, 20, 50000), timing [ff: 1.65s, ff_many: 4.14s, mp.queue: 46.71s]
