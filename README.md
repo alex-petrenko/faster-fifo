@@ -88,9 +88,7 @@ except Empty:
 | 20 producers 20 consumers (50K msgs per producer) |       78.75           |          14.39          |           15.78           |
 
 
-<br/>
-
-#### Footnote
+## Footnote
 
 Originally designed for SampleFactory, a high-throughput asynchronous RL codebase https://github.com/alex-petrenko/sample-factory.
 
