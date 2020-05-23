@@ -20,7 +20,6 @@ log.propagate = False  # workaround for duplicated logs in ipython
 log.addHandler(ch)
 
 MSG_SIZE = 5
-queue_full_flag = multiprocessing.RawValue(ctypes.c_bool, False)
 
 
 def make_msg(msg_idx):
@@ -41,9 +40,8 @@ def produce_msgs(q, p_idx, num_messages):
             log.exception(exc)
 
 
-def consume_msgs(q, p_idx, consume_many=1):
+def consume_msgs(q, p_idx, all_msgs_sent, consume_many=1):
     num_received = 0
-    global queue_full_flag
     while True:
         try:
             if consume_many == 1:
@@ -58,7 +56,7 @@ def consume_msgs(q, p_idx, consume_many=1):
                 num_received += 1
 
         except Empty:
-            if queue_full_flag.value:
+            if all_msgs_sent.value:
                 break
         except Exception as exc:
             log.exception(exc)
@@ -70,13 +68,12 @@ def run_test(queue_cls, num_producers, num_consumers, msgs_per_prod, consume_man
 
     producers = []
     consumers = []
-    global queue_full_flag
-    queue_full_flag = multiprocessing.RawValue(ctypes.c_bool, False)
+    all_msgs_sent = multiprocessing.RawValue(ctypes.c_bool, False)
     for j in range(num_producers):
         p = multiprocessing.Process(target=produce_msgs, args=(q, j, msgs_per_prod))
         producers.append(p)
     for j in range(num_consumers):
-        p = multiprocessing.Process(target=consume_msgs, args=(q, j, consume_many))
+        p = multiprocessing.Process(target=consume_msgs, args=(q, j, all_msgs_sent, consume_many))
         consumers.append(p)
     for p in producers:
         p.start()
@@ -84,7 +81,7 @@ def run_test(queue_cls, num_producers, num_consumers, msgs_per_prod, consume_man
         c.start()
     for p in producers:
         p.join()
-    queue_full_flag.value = True
+    all_msgs_sent.value = True
     for c in consumers:
         c.join()
     q.close()
@@ -110,11 +107,11 @@ class ComparisonTestCase(TestCase):
     def test_all_configurations(self):
         configurations = (
             (1, 1, 200000),
-            # (1, 10, 200000),
-            # (10, 1, 100000),
-            # (3, 20, 100000),
-            # (20, 3, 50000),
-            # (20, 20, 50000),
+            (1, 10, 200000),
+            (10, 1, 100000),
+            (3, 20, 100000),
+            (20, 3, 50000),
+            (20, 20, 50000),
         )
 
         results = []
