@@ -45,10 +45,10 @@ def consume_msgs(q, p_idx, all_msgs_sent, consume_many=1):
     while True:
         try:
             if consume_many == 1:
-                msg = q.get(timeout=0.001)
+                msg = q.get(timeout=0.01)
                 msgs = [msg]
             else:
-                msgs = q.get_many(timeout=0.001, max_messages_to_get=consume_many)
+                msgs = q.get_many(timeout=0.01, max_messages_to_get=consume_many)
 
             for msg in msgs:
                 if msg[0] % 50000 == 0:
@@ -122,6 +122,8 @@ class ComparisonTestCase(TestCase):
         for c, r in zip(configurations, results):
             log.info('Configuration %r, timing [ff: %.2fs, ff_many: %.2fs, mp.queue: %.2fs]', c, *r)
 
+
+# i9-7900X (10-core CPU)
 # [2020-05-16 03:24:26,548][30412] Configuration (1, 1, 200000), timing [ff: 0.92s, ff_many: 0.93s, mp.queue: 2.83s]
 # [2020-05-16 03:24:26,548][30412] Configuration (1, 10, 200000), timing [ff: 1.43s, ff_many: 1.40s, mp.queue: 7.60s]
 # [2020-05-16 03:24:26,548][30412] Configuration (10, 1, 100000), timing [ff: 4.95s, ff_many: 1.40s, mp.queue: 12.24s]
@@ -130,6 +132,7 @@ class ComparisonTestCase(TestCase):
 # [2020-05-16 03:24:26,548][30412] Configuration (20, 20, 50000), timing [ff: 1.65s, ff_many: 4.14s, mp.queue: 46.71s]
 
 
+# i5-4200U (dual-core CPU)
 # [2020-05-22 18:03:55,061][09146] Configuration (1, 1, 200000), timing [ff: 2.09s, ff_many: 2.20s, mp.queue: 7.86s]
 # [2020-05-22 18:03:55,061][09146] Configuration (1, 10, 200000), timing [ff: 4.01s, ff_many: 3.88s, mp.queue: 11.68s]
 # [2020-05-22 18:03:55,061][09146] Configuration (10, 1, 100000), timing [ff: 16.68s, ff_many: 5.98s, mp.queue: 44.48s]
