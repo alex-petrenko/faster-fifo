@@ -9,8 +9,11 @@ Implemented in C++ using POSIX mutexes with PTHREAD_PROCESS_SHARED attribute. Ba
 Completely mimics the interface of the standard multiprocessing.Queue, so can be used as a drop-in replacement.
 
 Adds `get_many()` method to receive multiple messages at once on a consumer for the price of a single lock.
+## Installation
 
-## Build instructions
+```pip install faster-fifo```
+
+## Manual build instructions
 
 ```
 pip install Cython

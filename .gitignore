@@ -132,3 +132,4 @@ dmypy.json
 .idea/
 cpp_faster_fifo/cpp_lib/cmake-build-debug
 faster_fifo.cpp
+manylinux_wheel/
