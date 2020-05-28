@@ -11,7 +11,7 @@ extensions = [
     ),
 ]
 
-with open("README.md", "r") as fh:
+with open('README.md', 'r') as fh:
     long_description = fh.read()
 
 setup(
@@ -22,9 +22,9 @@ setup(
     author='Aleksei Petrenko & Tushar Kumar',
     license='MIT',
     keywords='multiprocessing data structures',
-    description="A faster alternative to Python's standard multiprocessing.Queue (IPC FIFO queue)",
+    description='A faster alternative to Python\'s standard multiprocessing.Queue (IPC FIFO queue)',
     long_description=long_description,
-    long_description_content_type="text/markdown",
+    long_description_content_type='text/markdown',
 
     # Build instructions
     ext_modules=cythonize(extensions),
