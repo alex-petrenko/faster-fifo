@@ -110,7 +110,6 @@ size_t queue_object_size() {
 
 void create_queue(void *queue_obj_memory, size_t max_size_bytes) {
     const auto q = new(queue_obj_memory) Queue(max_size_bytes);
-    std::cout << __PRETTY_FUNCTION__ << " Max q size: " << q->get_max_buffer_size() << " ptr: " << queue_obj_memory << std::endl;
 }
 
 struct timeval float_seconds_to_timeval(float seconds) {
