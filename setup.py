@@ -11,14 +11,20 @@ extensions = [
     ),
 ]
 
+with open("README.md", "r") as fh:
+    long_description = fh.read()
+
 setup(
     # Information
     name='faster-fifo',
-    version='0.0.1',
+    version='0.0.2',
     url='https://github.com/alex-petrenko/faster-fifo',
     author='Aleksei Petrenko & Tushar Kumar',
     license='MIT',
     keywords='multiprocessing data structures',
+    description="A faster alternative to Python's standard multiprocessing.Queue (IPC FIFO queue)",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
 
     # Build instructions
     ext_modules=cythonize(extensions),
