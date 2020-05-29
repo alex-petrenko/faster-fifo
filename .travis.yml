@@ -10,7 +10,7 @@ notifications:
 install:
     - pip install -q cython
     - pip install coverage
-    - python setup.py build_ext --inplace
+    - pip install faster-fifo
 
 script:
   - coverage run -m unittest cpp_faster_fifo/tests/test_faster_fifo.py
