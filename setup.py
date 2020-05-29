@@ -28,6 +28,6 @@ setup(
 
     # Build instructions
     ext_modules=cythonize(extensions),
-
     setup_requires=['setuptools>=45.2.0', 'cython>=0.29'],
+    python_requires='>=3.7',
 )
