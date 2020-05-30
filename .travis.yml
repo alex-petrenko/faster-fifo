@@ -2,22 +2,19 @@
 language: python
 dist: bionic
 python:
-  - "3.5"
   - "3.6"
   - "3.7"
+  - "3.8"
 
 notifications:
   email: false
 
 install:
     - pip install -q cython
-    - pip install --upgrade pip>=19.3.1
     - pip install coverage
     - pip install faster-fifo
 
 script:
-  - which pip
-  - pip --version
   - coverage run -m unittest cpp_faster_fifo/tests/test_faster_fifo.py
 
 after_success:
