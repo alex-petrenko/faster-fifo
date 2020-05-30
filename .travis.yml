@@ -16,6 +16,8 @@ install:
     - pip install faster-fifo
 
 script:
+  - which pip
+  - pip --version
   - coverage run -m unittest cpp_faster_fifo/tests/test_faster_fifo.py
 
 after_success:
