@@ -17,7 +17,7 @@ with open('README.md', 'r') as fh:
 setup(
     # Information
     name='faster-fifo',
-    version='1.0.3',
+    version='1.0.4',
     url='https://github.com/alex-petrenko/faster-fifo',
     author='Aleksei Petrenko & Tushar Kumar',
     license='MIT',
@@ -29,6 +29,6 @@ setup(
     # Build instructions
     ext_modules=cythonize(extensions),
     setup_requires=['setuptools>=45.2.0', 'cython>=0.29'],
-    python_requires='>=3.6',
+    python_requires='>=3.6, <3.8',
     install_requires=["pip>=19.3"],
 )
