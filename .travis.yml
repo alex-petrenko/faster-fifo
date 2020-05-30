@@ -11,7 +11,7 @@ notifications:
 
 install:
     - pip install -q cython
-    - pip install --upgrade pip
+    - pip install --upgrade pip>=19.3.1
     - pip install coverage
     - pip install faster-fifo
 
