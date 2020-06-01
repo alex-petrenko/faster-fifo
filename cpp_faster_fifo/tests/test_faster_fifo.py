@@ -121,15 +121,15 @@ class TestFastQueue(TestCase):
         self.assertFalse(q_empty)
 
     def test_queue_full(self):
-        q = Queue(max_size_bytes=500)
+        q = Queue(max_size_bytes=60)
         self.assertFalse(q.full())
-        py_obj = dict(a=42, b=33, c=(1, 2, 3), d=[1, 2, 3], e='123', f=b'kkk')
-        q.put_nowait(py_obj)
-        self.assertFalse(q.full())
-        try:
-            q.put_nowait(py_obj)
-        except Full:
-            self.assertTrue(q.full())
+        py_obj = (1, 2)
+        while True:
+            try:
+                q.put_nowait(py_obj)
+            except Full:
+                self.assertTrue(q.full())
+                break
 
     def test_queue_usage(self):
         from faster_fifo import Queue
