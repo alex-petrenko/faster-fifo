@@ -19,7 +19,7 @@ Adds `get_many()` method to receive multiple messages at once on a consumer for 
 pip install Cython
 python setup.py build_ext --inplace
 ```
-
+(For MacOS, currently only manual build is available)
 ## Usage example
 
 ```Python
