@@ -7,20 +7,8 @@ python:
 jobs:
   include:
     - os: osx
-      osx_image: xcode11.2
-      language: shell
-      before_install:
-        - export CC=gcc-9
-        - export CXX=g++-9
-        - pip3 install -q cython
-        - pip3 install coverage
-      install:
-        - python3 setup.py build_ext --inplace
-
-    - os: osx
       osx_image: xcode11.3
       language: shell
-      env: TOXENV=py38
       before_install:
         - export CC=gcc-9
         - export CXX=g++-9
