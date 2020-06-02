@@ -1,18 +1,31 @@
-
 language: python
 dist: bionic
 python:
   - "3.6"
   - "3.7"
   - "3.8"
+jobs:
+  include:
+    - os: osx
+      osx_image: xcode11.3
+      language: shell
+      before_install:
+        - export CC=gcc-9
+        - export CXX=g++-9
+        - pip3 install -q cython
+        - pip3 install coverage
+      install:
+        - python3 setup.py build_ext --inplace
+
+before_install:
+  - pip install -q cython
+  - pip install coverage
+
+install:
+  - pip install faster-fifo
 
 notifications:
   email: false
-
-install:
-    - pip install -q cython
-    - pip install coverage
-    - pip install faster-fifo
 
 script:
   - coverage run -m unittest cpp_faster_fifo/tests/test_faster_fifo.py
