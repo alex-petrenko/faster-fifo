@@ -10,7 +10,7 @@ if [ $TRAVIS_OS_NAME = 'osx' ]; then
             pyenv global 3.6.2
             pip3 install setuptools==45.2.0 --force-reinstall
             pip3 install --upgrade pip
-              ;;
+            ;;
         py38)
             eval "$(pyenv init -)"
             pyenv install 3.8.0
