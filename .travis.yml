@@ -11,14 +11,17 @@ jobs:
       dist: "bionic"
       python: "3.6"
     - name: "Python 3.8 on OSX"
+      os: osx
       osx_image: xcode11.3
       language: generic
       env: TOXENV=py38
     - name: "Python 3.7 on OSX"
+      os: osx
       osx_image: xcode11.3
       language: generic
       env: TOXENV=py37
     - name: "Python 3.6 on OSX"
+      os: osx
       osx_image: xcode11.3
       language: generic
       env: TOXENV=py36
