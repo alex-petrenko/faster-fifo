@@ -29,6 +29,9 @@ jobs:
       language: generic
       env: TOXENV=py36
 
+before_install:
+  - chmod +x ./travis/install.sh
+
 install:
   - "./.travis/install.sh"
 
