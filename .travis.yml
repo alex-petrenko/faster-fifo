@@ -1,28 +1,30 @@
 language: python
-dist: bionic
-python:
-  - "3.6"
-  - "3.7"
-  - "3.8"
 jobs:
   include:
-    - os: osx
+    - name: "Python 3.8 on Linux Bionic"
+      dist: "bionic"
+      python: "3.8"
+    - name: "Python 3.7 on Linux Bionic"
+      dist: "bionic"
+      python: "3.7"
+    - name: "Python 3.6 on Linux Bionic"
+      dist: "bionic"
+      python: "3.6"
+    - name: "Python 3.8 on OSX"
       osx_image: xcode11.3
-      language: shell
-      before_install:
-        - export CC=gcc-9
-        - export CXX=g++-9
-        - pip3 install -q cython
-        - pip3 install coverage
-      install:
-        - python3 setup.py build_ext --inplace
-
-before_install:
-  - pip install -q cython
-  - pip install coverage
+      language: generic
+      env: TOXENV=py38
+    - name: "Python 3.7 on OSX"
+      osx_image: xcode11.3
+      language: generic
+      env: TOXENV=py37
+    - name: "Python 3.6 on OSX"
+      osx_image: xcode11.3
+      language: generic
+      env: TOXENV=py36
 
 install:
-  - pip install faster-fifo
+  - "./.travis/install.sh"
 
 notifications:
   email: false

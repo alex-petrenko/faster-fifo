@@ -2,7 +2,7 @@ import logging
 import multiprocessing
 from queue import Full, Empty
 from unittest import TestCase
-
+import sys
 from faster_fifo import Queue
 
 ch = logging.StreamHandler()
@@ -15,6 +15,9 @@ log.propagate = False  # workaround for duplicated logs in ipython
 log.addHandler(ch)
 
 MSG_SIZE = 5
+
+if sys.version_info >= (3, 8) and sys.platform == 'darwin':
+    multiprocessing.set_start_method('fork')
 
 
 def make_msg(msg_idx):
