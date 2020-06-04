@@ -19,7 +19,7 @@ if [ $TRAVIS_OS_NAME = 'osx' ]; then
     esac
     pip3 install cython
     pip3 install coverage
-    python3 setup.py build_ext --inplace
+    pip3 install faster-fifo
 else
     pip install cython
     pip install coverage
