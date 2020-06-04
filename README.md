@@ -3,7 +3,7 @@
 
 # faster-fifo
 
-Faster alternative to Python's standard multiprocessing.Queue (IPC FIFO queue). Up to 30x faster in some configurations. (**requires Python 3.6 or newer and MacOS or Linux**)
+Faster alternative to Python's standard multiprocessing.Queue (IPC FIFO queue). Up to 30x faster in some configurations. (**requires Python 3.6 or newer and runs on MacOS or Linux**)
 
 Implemented in C++ using POSIX mutexes with PTHREAD_PROCESS_SHARED attribute. Based on a circular buffer, low footprint, brokerless.
 Completely mimics the interface of the standard multiprocessing.Queue, so can be used as a drop-in replacement.
@@ -19,7 +19,7 @@ Adds `get_many()` method to receive multiple messages at once on a consumer for 
 pip install Cython
 python setup.py build_ext --inplace
 ```
-(For MacOS, currently only manual build is available)
+
 ## Usage example
 
 ```Python
@@ -63,7 +63,7 @@ except Empty:
 
 ## Performance comparison (faster-fifo vs multiprocessing.Queue)
 
-##### System #1 (Intel(R) Core(TM) i9-7900X CPU @ 3.30GHz, 10 cores)
+##### System #1 (Intel(R) Core(TM) i9-7900X CPU @ 3.30GHz, 10 cores, Ubuntu 18.04)
 
 *(measured execution times in seconds)*
 
@@ -77,7 +77,7 @@ except Empty:
 | 20 producers 20 consumers (50K msgs per producer) |       36.51           |           1.32          |            3.79           |
 
 
-##### System #2 (Intel(R) Core(TM) i5-4200U CPU @ 1.60GHz, 2 cores)
+##### System #2 (Intel(R) Core(TM) i5-4200U CPU @ 1.60GHz, 2 cores, Ubuntu 18.04)
 
 *(measured execution times in seconds)*
 
