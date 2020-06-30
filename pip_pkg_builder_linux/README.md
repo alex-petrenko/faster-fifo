@@ -17,7 +17,7 @@ and the docker image comes pre-installed with 3.5, 3.6, 3.7 and 3.8.
 6. Run the following command to build the ```linux_x86_64``` wheel  which is written to the ```output``` folder:  
 ```/opt/python/cp37-cp37m/bin/pip wheel /src -w /output```  
 7. The ```linux_x86_64``` wheel can now be converted into a ```manylinux2014``` wheel with the following command and writes it to the same ```output``` folder:  
-```auditwheel repair /src/package_name-version-cp37-cp37m-linux_x86_64.whl -w /output```  
+```auditwheel repair /output/package_name-version-cp37-cp37m-linux_x86_64.whl -w /output```  
 8. Next copy this manylinux wheel from the docker to any folder perhaps say ```manylinux_wheel``` with the following command:  
 ```docker cp manylinux_d:/output/package_name-version-cp37-cp37m-manylinux2014_x86_64.whl path-to-package/manylinux_wheel/```
 9. Also copy the ```package_name.tar.gz``` file from ```dist``` folder into the ```manylinux_wheel``` folder. This can be created by running the following command:  
