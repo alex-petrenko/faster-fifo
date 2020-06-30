@@ -7,6 +7,7 @@ extensions = [
         name='faster_fifo',
         sources=['faster_fifo.pyx', 'cpp_faster_fifo/cpp_lib/faster_fifo.cpp'],
         language='c++',
+        extra_compile_args=['-std=c++14'],
         include_dirs=['cpp_faster_fifo/cpp_lib'],
     ),
 ]
@@ -17,7 +18,7 @@ with open('README.md', 'r') as fh:
 setup(
     # Information
     name='faster-fifo',
-    version='1.0.6',
+    version='1.0.7',
     url='https://github.com/alex-petrenko/faster-fifo',
     author='Aleksei Petrenko & Tushar Kumar',
     license='MIT',
