@@ -2,7 +2,7 @@ import logging
 import multiprocessing
 from queue import Full, Empty
 from unittest import TestCase
-import sys
+
 from faster_fifo import Queue
 
 ch = logging.StreamHandler()
@@ -16,8 +16,10 @@ log.addHandler(ch)
 
 MSG_SIZE = 5
 
-if sys.version_info >= (3, 8) and sys.platform == 'darwin':
-    multiprocessing.set_start_method('fork')
+
+# I think we don't need this anymore (check!)
+# if sys.version_info >= (3, 8) and sys.platform == 'darwin':
+#     multiprocessing.set_start_method('fork')
 
 
 def make_msg(msg_idx):
@@ -135,9 +137,6 @@ class TestFastQueue(TestCase):
                 break
 
     def test_queue_usage(self):
-        from faster_fifo import Queue
-        from queue import Full, Empty
-
         q = Queue(1000 * 1000)  # specify the size of the circular buffer in the ctor
 
         # any pickle-able Python object can be added to the queue
@@ -170,3 +169,35 @@ class TestFastQueue(TestCase):
             assert True, 'This won\'t be called'
         except Empty:
             log.debug('Queue is empty')
+
+
+def spawn_producer(data_q_):
+    for i in range(10):
+        data = [1, 2, 3, i]
+        data_q_.put(data)
+
+
+def spawn_consumer(data_q_):
+    i = 0
+    while True:
+        try:
+            data = data_q_.get(timeout=0.5)
+            print(data)
+            i += 1
+        except Empty:
+            print('Read', i, 'messages')
+            break
+
+
+class TestSpawn(TestCase):
+    def test_spawn_ctx(self):
+        ctx = multiprocessing.get_context('spawn')
+        data_q = Queue(1000 * 1000)
+        procs = [
+            ctx.Process(target=spawn_producer, args=(data_q,)) for _ in range(2)
+        ]
+        procs.append(ctx.Process(target=spawn_consumer, args=(data_q,)))
+        for p in procs:
+            p.start()
+        for p in procs:
+            p.join()

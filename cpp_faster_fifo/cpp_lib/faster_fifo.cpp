@@ -109,7 +109,7 @@ size_t queue_object_size() {
 }
 
 void create_queue(void *queue_obj_memory, size_t max_size_bytes) {
-    const auto q = new(queue_obj_memory) Queue(max_size_bytes);
+    new(queue_obj_memory) Queue(max_size_bytes);  // placement new
 }
 
 struct timeval float_seconds_to_timeval(float seconds) {

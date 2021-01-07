@@ -47,10 +47,8 @@ class Queue:
 
         Q.create_queue(<void *> q_addr(self), max_size_bytes)
 
-        # make the initial message buffer size very small intentionally
-        # this way we can allocate optimal amount of memory by handling Q_MSG_BUFFER_TOO_SMALL status
-        self.message_buffer = (ctypes.c_ubyte * 2)()
-        self.message_buffer_memview = memoryview(self.message_buffer)
+        self.message_buffer = None
+        self.message_buffer_memview = None
 
     def close(self):
         """
@@ -99,6 +97,9 @@ class Queue:
         return self.put(x, block=False)
 
     def get_many(self, block=True, timeout=float(1e3), max_messages_to_get=int(1e9)):
+        if self.message_buffer is None:
+            self.reallocate_msg_buffer(10)  # initialize a small buffer at first, it will be increased later
+
         messages_read = ctypes.c_size_t(0)
         cdef size_t messages_read_ptr = ctypes.addressof(messages_read)
 
