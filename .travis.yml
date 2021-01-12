@@ -2,9 +2,9 @@ language: python
 jobs:
   include:
     - name: "Python 3.9 on Linux Bionic"
-        os: linux
-        dist: "bionic"
-        python: "3.9"
+      os: linux
+      dist: "bionic"
+      python: "3.9"
     - name: "Python 3.8 on Linux Bionic"
       os: linux
       dist: "bionic"
