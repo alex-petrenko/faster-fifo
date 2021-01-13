@@ -16,6 +16,11 @@ if [ $TRAVIS_OS_NAME = 'osx' ]; then
             pyenv install 3.8.0
             pyenv global 3.8.0
             ;;
+        py39)
+            eval "$(pyenv init -)"
+            pyenv install 3.9.0
+            pyenv global 3.9.0
+            ;;
     esac
     pip3 install cython
     pip3 install coverage
