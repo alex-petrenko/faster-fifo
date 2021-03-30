@@ -29,7 +29,7 @@ setup(
 
     # Build instructions
     ext_modules=cythonize(extensions),
-    setup_requires=['setuptools>=45.2.0', 'cython>=0.29'],
+    install_requires=['setuptools>=45.2.0', 'cython>=0.29'],
     python_requires='>=3.6',
     # install_requires=["pip>=19.3"],
 )
