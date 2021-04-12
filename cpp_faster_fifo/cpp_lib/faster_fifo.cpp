@@ -34,7 +34,7 @@ struct Queue {
 
     /// This function does not check if there is enough space in the circular buffer, assuming the check
     /// has been performed.
-    void circular_buffer_write(uint8_t *buffer, uint8_t *data, size_t data_size) {
+    void circular_buffer_write(uint8_t *buffer, const uint8_t *data, const size_t data_size) {
         if (tail + data_size < max_size_bytes) {
             // all data fits before the wrapping point
             memcpy(buffer + tail, data, data_size);
@@ -145,28 +145,42 @@ bool timer_positive(const struct timeval &timer) {
     return (timer.tv_sec > 0) || (timer.tv_sec == 0 && timer.tv_usec > 0);
 }
 
-int queue_put(void *queue_obj, void *buffer, void *msg_data, size_t msg_size, int block, float timeout) {
+int queue_put(void *queue_obj, void *buffer, const void **msgs_data, const size_t *msg_sizes, const size_t num_msgs, const int block, const float timeout) {
     auto q = (Queue *)queue_obj;
     LockGuard lock(&q->mutex);
 
     auto wait_remaining = float_seconds_to_timeval(timeout);
-    while (!q->can_fit(msg_size + sizeof(msg_size))) {
-        if (!block || !timer_positive(wait_remaining))
-            return Q_FULL;
 
-        wait_remaining = wait(wait_remaining, &q->not_full, &q->mutex);
+    bool has_written = false;
+    for (size_t i = 0; i < num_msgs; ++i) {
+        const size_t next_msg_size = msg_sizes[i];
+        while (!q->can_fit(next_msg_size + sizeof(size_t))) {
+            if (has_written)
+                pthread_cond_signal(&q->not_empty);
+
+            has_written = false;
+
+            if (!block || !timer_positive(wait_remaining))
+                return Q_FULL;
+
+            wait_remaining = wait(wait_remaining, &q->not_full, &q->mutex);
+        }
+
+        // write the size to the circular buffer
+        q->circular_buffer_write((uint8_t *)buffer, reinterpret_cast<const uint8_t *>(&next_msg_size), sizeof(size_t));
+
+        // write the message to the circular buffer
+        q->circular_buffer_write((uint8_t *)buffer, reinterpret_cast<const uint8_t **>(msgs_data)[i], next_msg_size);
+
+        // Increment count by one as one element has been added
+        ++q->num_elem;
+
+        has_written = true;
     }
 
-    // write the size of the message to the circular buffer
-    q->circular_buffer_write((uint8_t *)buffer, (uint8_t *)&msg_size, sizeof(msg_size));
+    if (has_written)
+        pthread_cond_signal(&q->not_empty);
 
-    // write the message itself
-    q->circular_buffer_write((uint8_t *)buffer, (uint8_t *)msg_data, msg_size);
-
-    pthread_cond_signal(&q->not_empty);
-    
-    // Increment count by one as one element has been added
-    ++q->num_elem;
     return Q_SUCCESS;
 }
 

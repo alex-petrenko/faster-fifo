@@ -14,25 +14,23 @@ _ForkingPickler = context.reduction.ForkingPickler
 
 cimport faster_fifo_def as Q
 
+cdef size_t caddr(buf):
+    cdef size_t buffer_ptr = ctypes.addressof(buf)
+    return buffer_ptr
 
 cdef size_t q_addr(q):
-    cdef size_t obj_buffer_ptr = ctypes.addressof(q.queue_obj_buffer)
-    return obj_buffer_ptr
-
+    return caddr(q.queue_obj_buffer)
 
 cdef size_t buf_addr(q):
-    cdef size_t buffer_ptr = ctypes.addressof(q.shared_memory)
-    return buffer_ptr
-
+    return caddr(q.shared_memory)
 
 cdef size_t msg_buf_addr(q):
-    cdef size_t buffer_ptr = ctypes.addressof(q.message_buffer)
-    return buffer_ptr
-
+    return caddr(q.message_buffer)
 
 cdef size_t bytes_to_ptr(b):
     ptr = ctypes.cast(b, ctypes.POINTER(ctypes.c_byte))
     return ctypes.addressof(ptr.contents)
+
 
 class Queue:
     def __init__(self, max_size_bytes=200000):
@@ -64,15 +62,26 @@ class Queue:
         """
         return self.closed.value
 
-    def put(self, x, block=True, timeout=float(1e3)):
-        x = _ForkingPickler.dumps(x).tobytes()
+    def put_many(self, xs, block=True, timeout=float(1e3)):
+        assert isinstance(xs, (list, tuple))
+        xs = [_ForkingPickler.dumps(ele).tobytes() for ele in xs]
 
+        _len = len
+        msgs_buf = (c_size_t * _len(xs))()
+        size_buf = (c_size_t * _len(xs))()
+
+        for i, ele in enumerate(xs):
+            msgs_buf[i] = bytes_to_ptr(ele)
+            size_buf[i] = _len(ele)
+        
         # explicitly convert all function parameters to corresponding C-types
         cdef void* c_q_addr = <void*>q_addr(self)
         cdef void* c_buf_addr = <void*>buf_addr(self)
-        cdef void* c_x_ptr = <void*>bytes_to_ptr(x)
 
-        cdef size_t c_len_x = len(x)
+        cdef const void** c_msgs_buf_addr = <const void**>caddr(msgs_buf)
+        cdef const size_t* c_size_buff_addr = <const size_t*>caddr(size_buf)
+
+        cdef size_t c_len_x = _len(xs)
         cdef int c_block = block
         cdef float c_timeout = timeout
 
@@ -80,7 +89,7 @@ class Queue:
 
         with nogil:
             c_status = Q.queue_put(
-                c_q_addr, c_buf_addr, c_x_ptr, c_len_x,
+                c_q_addr, c_buf_addr, c_msgs_buf_addr, c_size_buff_addr, c_len_x,
                 c_block, c_timeout,
             )
 
@@ -93,8 +102,14 @@ class Queue:
         else:
             raise Exception(f'Unexpected queue error {status}')
 
+    def put(self, x, block=True, timeout=float(1e3)):
+        return self.put_many([x], block, timeout)
+
+    def put_many_nowait(self, xs):
+        return self.put_many(xs, block=False)
+
     def put_nowait(self, x):
-        return self.put(x, block=False)
+        return self.put_many_nowait([x])
 
     def get_many(self, block=True, timeout=float(1e3), max_messages_to_get=int(1e9)):
         if self.message_buffer is None:
