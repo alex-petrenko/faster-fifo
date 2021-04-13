@@ -7,7 +7,7 @@ cdef extern from 'cpp_faster_fifo/cpp_lib/faster_fifo.hpp':
     size_t queue_object_size();
     void create_queue(void *queue_obj_memory, size_t max_size_bytes);
 
-    int queue_put(void *queue_obj, void *buffer, void **msgs_data, size_t *msg_sizes, size_t num_msgs, int block, float timeout) nogil;
+    int queue_put(void *queue_obj, void *buffer, const void **msgs_data, const size_t *msg_sizes, size_t num_msgs, int block, float timeout) nogil;
     int queue_get(void *queue_obj, void *buffer,
                   void *msg_buffer, size_t msg_buffer_size,
                   size_t max_messages_to_get, size_t max_bytes_to_get,

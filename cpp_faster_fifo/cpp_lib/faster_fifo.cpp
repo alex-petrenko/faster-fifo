@@ -145,7 +145,7 @@ bool timer_positive(const struct timeval &timer) {
     return (timer.tv_sec > 0) || (timer.tv_sec == 0 && timer.tv_usec > 0);
 }
 
-int queue_put(void *queue_obj, void *buffer, void **msgs_data, size_t *msg_sizes, size_t num_msgs, int block, const float timeout) {
+int queue_put(void *queue_obj, void *buffer, const void **msgs_data, const size_t *msg_sizes, const size_t num_msgs, const int block, const float timeout) {
     auto q = (Queue *)queue_obj;
     LockGuard lock(&q->mutex);
 

@@ -78,8 +78,8 @@ class Queue:
         cdef void* c_q_addr = <void*>q_addr(self)
         cdef void* c_buf_addr = <void*>buf_addr(self)
 
-        cdef void** c_msgs_buf_addr = <void**>caddr(msgs_buf)
-        cdef size_t* c_size_buff_addr = <size_t*>caddr(size_buf)
+        cdef const void** c_msgs_buf_addr = <const void**>caddr(msgs_buf)
+        cdef const size_t* c_size_buff_addr = <const size_t*>caddr(size_buf)
 
         cdef size_t c_len_x = _len(xs)
         cdef int c_block = block
