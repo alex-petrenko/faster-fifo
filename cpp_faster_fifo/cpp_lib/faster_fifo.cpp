@@ -145,41 +145,36 @@ bool timer_positive(const struct timeval &timer) {
     return (timer.tv_sec > 0) || (timer.tv_sec == 0 && timer.tv_usec > 0);
 }
 
-int queue_put(void *queue_obj, void *buffer, const void **msgs_data, const size_t *msg_sizes, const size_t num_msgs, const int block, const float timeout) {
+int queue_put(void *queue_obj, void *buffer, void **msgs_data, size_t *msg_sizes, size_t num_msgs, int block, const float timeout) {
     auto q = (Queue *)queue_obj;
     LockGuard lock(&q->mutex);
 
-    auto wait_remaining = float_seconds_to_timeval(timeout);
+    {
+        size_t total_size = num_msgs * sizeof(size_t);
+        for (size_t i = 0; i < num_msgs; ++i)
+            total_size += msg_sizes[i];
 
-    bool has_written = false;
-    for (size_t i = 0; i < num_msgs; ++i) {
-        const size_t next_msg_size = msg_sizes[i];
-        while (!q->can_fit(next_msg_size + sizeof(size_t))) {
-            if (has_written)
-                pthread_cond_signal(&q->not_empty);
-
-            has_written = false;
-
+        auto wait_remaining = float_seconds_to_timeval(timeout);
+        while (!q->can_fit(total_size)) {
             if (!block || !timer_positive(wait_remaining))
                 return Q_FULL;
 
             wait_remaining = wait(wait_remaining, &q->not_full, &q->mutex);
         }
+    }
 
+    for (size_t i = 0; i < num_msgs; ++i) {
         // write the size to the circular buffer
-        q->circular_buffer_write((uint8_t *)buffer, reinterpret_cast<const uint8_t *>(&next_msg_size), sizeof(size_t));
+        q->circular_buffer_write((uint8_t *)buffer, reinterpret_cast<const uint8_t *>(msg_sizes + i), sizeof(size_t));
 
         // write the message to the circular buffer
-        q->circular_buffer_write((uint8_t *)buffer, reinterpret_cast<const uint8_t **>(msgs_data)[i], next_msg_size);
+        q->circular_buffer_write((uint8_t *)buffer, reinterpret_cast<const uint8_t *>(msgs_data[i]), msg_sizes[i]);
 
         // Increment count by one as one element has been added
         ++q->num_elem;
-
-        has_written = true;
     }
 
-    if (has_written)
-        pthread_cond_signal(&q->not_empty);
+    pthread_cond_signal(&q->not_empty);
 
     return Q_SUCCESS;
 }
