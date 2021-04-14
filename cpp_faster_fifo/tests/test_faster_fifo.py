@@ -92,11 +92,29 @@ class TestFastQueue(TestCase):
 
     def test_msg(self):
         q = Queue(max_size_bytes=1000)
+
         py_obj = dict(a=42, b=33, c=(1, 2, 3), d=[1, 2, 3], e='123', f=b'kkk')
         q.put_nowait(py_obj)
         res = q.get_nowait()
-        log.debug('Got object %r', res)
+        log.debug('got object %r', res)
         self.assertEqual(py_obj, res)
+
+    def test_msg_many(self):
+        q = Queue(max_size_bytes=100000)
+
+        py_objs = [dict(a=42, b=33, c=(1, 2, 3), d=[1, 2, 3], e='123', f=b'kkk') for _ in range(5)]
+        q.put_many_nowait(py_objs)
+        res = q.get_many_nowait()
+
+        while not q.empty():
+            res.extend(q.get_many_nowait())
+
+        log.debug('Got object %r', res)
+        self.assertEqual(py_objs, res)
+
+        q.put_nowait(py_objs)
+        res = q.get_nowait()
+        self.assertEqual(py_objs, res)
 
     def test_queue_size(self):
         q = Queue(max_size_bytes=1000)

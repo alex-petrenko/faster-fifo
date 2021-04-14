@@ -24,9 +24,9 @@ if [ $TRAVIS_OS_NAME = 'osx' ]; then
     esac
     pip3 install cython
     pip3 install coverage
-    pip3 install faster-fifo
+    pip3 install .
 else
     pip install cython
     pip install coverage
-    pip install faster-fifo
+    pip install .
 fi
