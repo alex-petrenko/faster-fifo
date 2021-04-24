@@ -112,12 +112,6 @@ void create_queue(void *queue_obj_memory, size_t max_size_bytes) {
     new(queue_obj_memory) Queue(max_size_bytes);  // placement new
 }
 
-bool is_queue_full(void *queue_obj) {
-    auto q = (Queue *)queue_obj;
-    constexpr size_t min_message_size = 1;
-    return !q->can_fit(min_message_size + sizeof(min_message_size));
-}
-
 struct timeval float_seconds_to_timeval(float seconds) {
     struct timeval wait_timeval{};
 
@@ -165,9 +159,6 @@ int queue_put(void *queue_obj, void *buffer, const void **msgs_data, const size_
             if (!block || !timer_positive(wait_remaining))
                 return Q_FULL;
 
-            if (!is_queue_full(queue_obj))
-                pthread_cond_signal(&q->not_full);
-
             wait_remaining = wait(wait_remaining, &q->not_full, &q->mutex);
         }
     }
@@ -184,9 +175,6 @@ int queue_put(void *queue_obj, void *buffer, const void **msgs_data, const size_
     }
 
     pthread_cond_signal(&q->not_empty);
-
-    if (!is_queue_full(queue_obj))
-        pthread_cond_signal(&q->not_full);
 
     return Q_SUCCESS;
 }
@@ -243,8 +231,14 @@ int queue_get(void *queue_obj, void *buffer,
     if (*messages_read > 0)
         pthread_cond_signal(&q->not_full);
 
+    // Due the put_many method, we can put many things into the queue 
+    // the pthread_cond_signal at the end of queue_put is only guaranteed 
+    // to wake up 1 waiter on not_empty, so if the queue
+    // is still not empty after out read, we should also
+    // single the not_empty CV incase there are procs
+    // waiting
     if (q->size > 0)
-        pthread_cond_signal(&q->not_empty);
+        pthread_cond_signal(&q->not_empty)
 
     // we managed to read as many messages as we wanted and they all fit into the buffer!
     return status;
@@ -255,3 +249,8 @@ size_t get_queue_size(void *queue_obj) {
     return q->num_elem;
 }
 
+bool is_queue_full(void *queue_obj) {
+    auto q = (Queue *)queue_obj;
+    constexpr size_t min_message_size = 1;
+    return !q->can_fit(min_message_size + sizeof(min_message_size));
+}
