@@ -86,6 +86,7 @@ public:
     pthread_mutex_t mutex{};
 
     pthread_condattr_t cond_attr{};
+    int not_empty_n_waiters = 0, not_full_n_waiters = 0;
     pthread_cond_t not_empty{}, not_full{};
 };
 
@@ -123,7 +124,7 @@ struct timeval float_seconds_to_timeval(float seconds) {
     return wait_timeval;
 }
 
-struct timeval wait(struct timeval wait_time, pthread_cond_t *cond, pthread_mutex_t *mutex) {
+struct timeval wait(struct timeval wait_time, pthread_cond_t *cond, pthread_mutex_t *mutex, int *waiter_count) {
     struct timeval now{}, wait_until{};
     gettimeofday(&now, nullptr);
 
@@ -133,7 +134,9 @@ struct timeval wait(struct timeval wait_time, pthread_cond_t *cond, pthread_mute
     wait_until_ts.tv_sec = wait_until.tv_sec;
     wait_until_ts.tv_nsec = wait_until.tv_usec * 1000UL;
 
+    ++(*waiter_count);
     pthread_cond_timedwait(cond, mutex, &wait_until_ts);
+    --(*waiter_count);
 
     gettimeofday(&now, nullptr);
     struct timeval remaining{};
@@ -159,7 +162,7 @@ int queue_put(void *queue_obj, void *buffer, const void **msgs_data, const size_
             if (!block || !timer_positive(wait_remaining))
                 return Q_FULL;
 
-            wait_remaining = wait(wait_remaining, &q->not_full, &q->mutex);
+            wait_remaining = wait(wait_remaining, &q->not_full, &q->mutex, &q->not_full_n_waiters);
         }
     }
 
@@ -173,8 +176,9 @@ int queue_put(void *queue_obj, void *buffer, const void **msgs_data, const size_
         // Increment count by one as one element has been added
         ++q->num_elem;
     }
-
-    pthread_cond_signal(&q->not_empty);
+    
+    if (q->not_empty_n_waiters > 0)
+        pthread_cond_signal(&q->not_empty);
 
     return Q_SUCCESS;
 }
@@ -195,7 +199,7 @@ int queue_get(void *queue_obj, void *buffer,
         if (!block || !timer_positive(wait_remaining))
             return Q_EMPTY;
 
-        wait_remaining = wait(wait_remaining, &q->not_empty, &q->mutex);
+        wait_remaining = wait(wait_remaining, &q->not_empty, &q->mutex, &q->not_empty_n_waiters);
     }
 
     auto status = Q_SUCCESS;
@@ -228,17 +232,17 @@ int queue_get(void *queue_obj, void *buffer,
         }
     }
 
-    if (*messages_read > 0)
+    if (*messages_read > 0 && q->not_full_n_waiters > 0)
         pthread_cond_signal(&q->not_full);
 
     // Due the put_many method, we can put many things into the queue 
     // the pthread_cond_signal at the end of queue_put is only guaranteed 
     // to wake up 1 waiter on not_empty, so if the queue
     // is still not empty after out read, we should also
-    // single the not_empty CV incase there are procs
+    // single the not_empty CV when there are procs
     // waiting
-    if (q->size > 0)
-        pthread_cond_signal(&q->not_empty)
+    else if (q->size > 0 && q->not_empty_n_waiters > 0)
+        pthread_cond_signal(&q->not_empty);
 
     // we managed to read as many messages as we wanted and they all fit into the buffer!
     return status;
