@@ -4,7 +4,6 @@
 
 import ctypes
 import multiprocessing
-import time
 
 from ctypes import c_size_t
 from multiprocessing import context
@@ -13,6 +12,11 @@ from queue import Full, Empty
 _ForkingPickler = context.reduction.ForkingPickler
 
 cimport faster_fifo_def as Q
+
+
+DEFAULT_TIMEOUT = float(10)
+DEFAULT_CIRCULAR_BUFFER_SIZE = 1000 * 1000  # 1 Mb
+
 
 cdef size_t caddr(buf):
     cdef size_t buffer_ptr = ctypes.addressof(buf)
@@ -33,7 +37,7 @@ cdef size_t bytes_to_ptr(b):
 
 
 class Queue:
-    def __init__(self, max_size_bytes=200000):
+    def __init__(self, max_size_bytes=DEFAULT_CIRCULAR_BUFFER_SIZE):
         self.max_size_bytes = max_size_bytes
         self.max_bytes_to_read = self.max_size_bytes  # by default, read the whole queue if necessary
 
@@ -62,7 +66,7 @@ class Queue:
         """
         return self.closed.value
 
-    def put_many(self, xs, block=True, timeout=float(1e3)):
+    def put_many(self, xs, block=True, timeout=DEFAULT_TIMEOUT):
         assert isinstance(xs, (list, tuple))
         xs = [_ForkingPickler.dumps(ele).tobytes() for ele in xs]
 
@@ -102,7 +106,7 @@ class Queue:
         else:
             raise Exception(f'Unexpected queue error {status}')
 
-    def put(self, x, block=True, timeout=float(1e3)):
+    def put(self, x, block=True, timeout=DEFAULT_TIMEOUT):
         return self.put_many([x], block, timeout)
 
     def put_many_nowait(self, xs):
@@ -111,7 +115,7 @@ class Queue:
     def put_nowait(self, x):
         return self.put_many_nowait([x])
 
-    def get_many(self, block=True, timeout=float(1e3), max_messages_to_get=int(1e9)):
+    def get_many(self, block=True, timeout=DEFAULT_TIMEOUT, max_messages_to_get=int(1e9)):
         if self.message_buffer is None:
             self.reallocate_msg_buffer(10)  # initialize a small buffer at first, it will be increased later
 
@@ -175,7 +179,7 @@ class Queue:
     def get_many_nowait(self, max_messages_to_get=int(1e9)):
         return self.get_many(block=False, max_messages_to_get=max_messages_to_get)
 
-    def get(self, block=True, timeout=float(1e3)):
+    def get(self, block=True, timeout=DEFAULT_TIMEOUT):
         return self.get_many(block=block, timeout=timeout, max_messages_to_get=1)[0]
 
     def get_nowait(self):
