@@ -235,12 +235,13 @@ int queue_get(void *queue_obj, void *buffer,
     if (*messages_read > 0 && q->not_full_n_waiters > 0)
         pthread_cond_signal(&q->not_full);
 
-    // Due the put_many method, we can put many things into the queue 
-    // the pthread_cond_signal at the end of queue_put is only guaranteed 
-    // to wake up 1 waiter on not_empty, so if the queue
+    // Due the put_many method, we can put many things into the queue.
+    // However, the pthread_cond_signal at the end of queue_put is 
+    // only guaranteed to wake up 1 waiter on not_empty. So if the queue
     // is still not empty after out read, we should also
-    // single the not_empty CV when there are procs
-    // waiting
+    // signal the not_empty CV when there are procs
+    // waiting.  Only send this signal if we didn't signal
+    // not_full as this would just create lock contention otherwise
     else if (q->size > 0 && q->not_empty_n_waiters > 0)
         pthread_cond_signal(&q->not_empty);
 
