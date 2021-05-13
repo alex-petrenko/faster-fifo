@@ -78,6 +78,9 @@ struct Queue {
     }
 
 public:
+    // 9 bytes is the min message size.  8 bytes for the size
+    // and 1 for the message
+    static const size_t MIN_MSG_SIZE = 9;
     size_t max_size_bytes;
     size_t head = 0, tail = 0, size = 0;
     size_t num_elem = 0;
@@ -162,6 +165,10 @@ int queue_put(void *queue_obj, void *buffer, const void **msgs_data, const size_
             if (!block || !timer_positive(wait_remaining))
                 return Q_FULL;
 
+            // If there are any consumers waiting, wake them up!
+            if (q->not_empty_n_waiters > 0)
+                pthread_cond_signal(&q->not_empty);
+
             wait_remaining = wait(wait_remaining, &q->not_full, &q->mutex, &q->not_full_n_waiters);
         }
     }
@@ -179,6 +186,12 @@ int queue_put(void *queue_obj, void *buffer, const void **msgs_data, const size_
     
     if (q->not_empty_n_waiters > 0)
         pthread_cond_signal(&q->not_empty);
+
+    // In the case of many producers and one batched consumer, producers
+    // should wake each other up as the batched consumer is only guaranteed to
+    // wake up 1 producer its pthread_cond_signal(&q->not_full).
+    else if (q->not_full_n_waiters && q->can_fit(Queue::MIN_MSG_SIZE))
+        pthread_cond_signal(&q->not_full);
 
     return Q_SUCCESS;
 }
@@ -235,12 +248,10 @@ int queue_get(void *queue_obj, void *buffer,
     if (*messages_read > 0 && q->not_full_n_waiters > 0)
         pthread_cond_signal(&q->not_full);
 
-    // Due the put_many method, we can put many things into the queue.
-    // However, the pthread_cond_signal at the end of queue_put is 
-    // only guaranteed to wake up 1 waiter on not_empty. So if the queue
-    // is still not empty after out read, we should also
-    // signal the not_empty CV when there are procs
-    // waiting.  Only send this signal if we didn't signal
+    // In the case of many consumers and a single batched producer,
+    // consumers need to wake each other up as the producer is only
+    // guaranteed to wake up 1 consumer with its pthread_cond_signal(&q->not_empty).
+    // Only send this signal if we didn't signal
     // not_full as this would just create lock contention otherwise
     else if (q->size > 0 && q->not_empty_n_waiters > 0)
         pthread_cond_signal(&q->not_empty);
