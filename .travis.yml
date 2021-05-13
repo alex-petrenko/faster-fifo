@@ -45,7 +45,11 @@ install:
   - "./.travis/install.sh"
 
 notifications:
-  email: false
+  email:
+    recipients:
+    - apetrenko1991@gmail.com
+    on_success: change
+    on_failure: always
 
 script:
   - coverage run -m unittest cpp_faster_fifo/tests/test_faster_fifo.py
