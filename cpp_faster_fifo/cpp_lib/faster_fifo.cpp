@@ -186,12 +186,13 @@ int queue_put(void *queue_obj, void *buffer, const void **msgs_data, const size_
     
     if (q->not_empty_n_waiters > 0)
         pthread_cond_signal(&q->not_empty);
+    else if (q->not_full_n_waiters && q->can_fit(Queue::MIN_MSG_SIZE)) {
+        // In the case of many producers and one batched consumer, producers
+        // should wake each other up as the batched consumer is only guaranteed to
+        // wake up 1 producer its pthread_cond_signal(&q->not_full).
 
-    // In the case of many producers and one batched consumer, producers
-    // should wake each other up as the batched consumer is only guaranteed to
-    // wake up 1 producer its pthread_cond_signal(&q->not_full).
-    else if (q->not_full_n_waiters && q->can_fit(Queue::MIN_MSG_SIZE))
         pthread_cond_signal(&q->not_full);
+    }
 
     return Q_SUCCESS;
 }
@@ -247,14 +248,15 @@ int queue_get(void *queue_obj, void *buffer,
 
     if (*messages_read > 0 && q->not_full_n_waiters > 0)
         pthread_cond_signal(&q->not_full);
+    else if (q->size > 0 && q->not_empty_n_waiters > 0) {
+        // In the case of many consumers and a single batched producer,
+        // consumers need to wake each other up as the producer is only
+        // guaranteed to wake up 1 consumer with its pthread_cond_signal(&q->not_empty).
+        // Only send this signal if we didn't signal
+        // not_full as this would just create lock contention otherwise
 
-    // In the case of many consumers and a single batched producer,
-    // consumers need to wake each other up as the producer is only
-    // guaranteed to wake up 1 consumer with its pthread_cond_signal(&q->not_empty).
-    // Only send this signal if we didn't signal
-    // not_full as this would just create lock contention otherwise
-    else if (q->size > 0 && q->not_empty_n_waiters > 0)
         pthread_cond_signal(&q->not_empty);
+    }
 
     // we managed to read as many messages as we wanted and they all fit into the buffer!
     return status;
