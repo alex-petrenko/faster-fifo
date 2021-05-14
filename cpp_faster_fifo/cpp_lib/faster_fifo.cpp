@@ -78,6 +78,9 @@ struct Queue {
     }
 
 public:
+    // 9 bytes is the min message size.  8 bytes for the size
+    // and 1 for the message
+    static const size_t MIN_MSG_SIZE = 9;
     size_t max_size_bytes;
     size_t head = 0, tail = 0, size = 0;
     size_t num_elem = 0;
@@ -86,6 +89,7 @@ public:
     pthread_mutex_t mutex{};
 
     pthread_condattr_t cond_attr{};
+    int not_empty_n_waiters = 0, not_full_n_waiters = 0;
     pthread_cond_t not_empty{}, not_full{};
 };
 
@@ -123,7 +127,7 @@ struct timeval float_seconds_to_timeval(float seconds) {
     return wait_timeval;
 }
 
-struct timeval wait(struct timeval wait_time, pthread_cond_t *cond, pthread_mutex_t *mutex) {
+struct timeval wait(struct timeval wait_time, pthread_cond_t *cond, pthread_mutex_t *mutex, int *waiter_count) {
     struct timeval now{}, wait_until{};
     gettimeofday(&now, nullptr);
 
@@ -133,7 +137,9 @@ struct timeval wait(struct timeval wait_time, pthread_cond_t *cond, pthread_mute
     wait_until_ts.tv_sec = wait_until.tv_sec;
     wait_until_ts.tv_nsec = wait_until.tv_usec * 1000UL;
 
+    ++(*waiter_count);
     pthread_cond_timedwait(cond, mutex, &wait_until_ts);
+    --(*waiter_count);
 
     gettimeofday(&now, nullptr);
     struct timeval remaining{};
@@ -159,7 +165,11 @@ int queue_put(void *queue_obj, void *buffer, const void **msgs_data, const size_
             if (!block || !timer_positive(wait_remaining))
                 return Q_FULL;
 
-            wait_remaining = wait(wait_remaining, &q->not_full, &q->mutex);
+            // If there are any consumers waiting, wake them up!
+            if (q->not_empty_n_waiters > 0)
+                pthread_cond_signal(&q->not_empty);
+
+            wait_remaining = wait(wait_remaining, &q->not_full, &q->mutex, &q->not_full_n_waiters);
         }
     }
 
@@ -173,8 +183,15 @@ int queue_put(void *queue_obj, void *buffer, const void **msgs_data, const size_
         // Increment count by one as one element has been added
         ++q->num_elem;
     }
+    
+    if (q->not_empty_n_waiters > 0)
+        pthread_cond_signal(&q->not_empty);
 
-    pthread_cond_signal(&q->not_empty);
+    // In the case of many producers and one batched consumer, producers
+    // should wake each other up as the batched consumer is only guaranteed to
+    // wake up 1 producer its pthread_cond_signal(&q->not_full).
+    else if (q->not_full_n_waiters && q->can_fit(Queue::MIN_MSG_SIZE))
+        pthread_cond_signal(&q->not_full);
 
     return Q_SUCCESS;
 }
@@ -195,7 +212,7 @@ int queue_get(void *queue_obj, void *buffer,
         if (!block || !timer_positive(wait_remaining))
             return Q_EMPTY;
 
-        wait_remaining = wait(wait_remaining, &q->not_empty, &q->mutex);
+        wait_remaining = wait(wait_remaining, &q->not_empty, &q->mutex, &q->not_empty_n_waiters);
     }
 
     auto status = Q_SUCCESS;
@@ -228,8 +245,16 @@ int queue_get(void *queue_obj, void *buffer,
         }
     }
 
-    if (*messages_read > 0)
+    if (*messages_read > 0 && q->not_full_n_waiters > 0)
         pthread_cond_signal(&q->not_full);
+
+    // In the case of many consumers and a single batched producer,
+    // consumers need to wake each other up as the producer is only
+    // guaranteed to wake up 1 consumer with its pthread_cond_signal(&q->not_empty).
+    // Only send this signal if we didn't signal
+    // not_full as this would just create lock contention otherwise
+    else if (q->size > 0 && q->not_empty_n_waiters > 0)
+        pthread_cond_signal(&q->not_empty);
 
     // we managed to read as many messages as we wanted and they all fit into the buffer!
     return status;
