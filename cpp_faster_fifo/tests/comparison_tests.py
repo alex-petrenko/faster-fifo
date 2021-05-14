@@ -131,6 +131,15 @@ class ComparisonTestCase(TestCase):
 # [2020-05-16 03:24:26,548][30412] Configuration (20, 3, 50000), timing [ff: 3.19s, ff_many: 1.12s, mp.queue: 29.07s]
 # [2020-05-16 03:24:26,548][30412] Configuration (20, 20, 50000), timing [ff: 1.65s, ff_many: 4.14s, mp.queue: 46.71s]
 
+# With Erik's changes to prevent stale (version 1.1.2)
+# [2021-05-14 00:51:46,237][25370] Configuration (1, 1, 200000), timing [ff: 1.05s, ff_many: 1.10s, mp.queue: 2.32s]
+# [2021-05-14 00:51:46,237][25370] Configuration (1, 10, 200000), timing [ff: 1.49s, ff_many: 1.51s, mp.queue: 3.31s]
+# [2021-05-14 00:51:46,237][25370] Configuration (10, 1, 100000), timing [ff: 6.07s, ff_many: 0.97s, mp.queue: 12.92s]
+# [2021-05-14 00:51:46,237][25370] Configuration (3, 20, 100000), timing [ff: 2.27s, ff_many: 2.19s, mp.queue: 6.55s]
+# [2021-05-14 00:51:46,237][25370] Configuration (20, 3, 50000), timing [ff: 7.65s, ff_many: 0.70s, mp.queue: 15.40s]
+# [2021-05-14 00:51:46,237][25370] Configuration (20, 20, 50000), timing [ff: 1.82s, ff_many: 4.14s, mp.queue: 31.65s]
+# Ran 1 test in 103.115s
+
 
 # i5-4200U (dual-core CPU)
 # [2020-05-22 18:03:55,061][09146] Configuration (1, 1, 200000), timing [ff: 2.09s, ff_many: 2.20s, mp.queue: 7.86s]
