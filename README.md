@@ -34,6 +34,7 @@ pip install -e .
 
 ```Python
 from faster_fifo import Queue
+import faster_fifo_reduction
 from queue import Full, Empty
 
 q = Queue(1000 * 1000)  # specify the size of the circular buffer in the ctor
@@ -100,6 +101,14 @@ except Empty:
 |  20 producers 3 consumers (50K msgs per producer) |       66.3            |           22.3          |            6.35           |
 | 20 producers 20 consumers (50K msgs per producer) |       78.75           |          14.39          |           15.78           |
 
+
+## Using multiprocessing.get_context('spawn')
+
+In order to use faster_fifo with 'spawn' make sure to add `import faster_fifo_reduction`. This install the custom pickler, otherwise you might get an error like this:
+
+```
+PicklingError: Can't pickle <class '__main__.c_ubyte_Array_2'>: attribute lookup c_ubyte_Array_2
+```
 
 ## Footnote
 
