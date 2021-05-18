@@ -4,6 +4,8 @@ from queue import Full, Empty
 from unittest import TestCase
 
 from faster_fifo import Queue
+import faster_fifo_reduction
+
 
 ch = logging.StreamHandler()
 ch.setLevel(logging.DEBUG)
@@ -215,6 +217,14 @@ class TestSpawn(TestCase):
             ctx.Process(target=spawn_producer, args=(data_q,)) for _ in range(2)
         ]
         procs.append(ctx.Process(target=spawn_consumer, args=(data_q,)))
+
+        # add data to the queue and read some of it back to make sure all buffers are initialized before
+        # the new process is spawned (such that we need to pickle everything)
+        for i in range(10):
+            data_q.put(self.test_spawn_ctx.__name__)
+        msgs = data_q.get_many(max_messages_to_get=2)
+        print(msgs)
+
         for p in procs:
             p.start()
         for p in procs:

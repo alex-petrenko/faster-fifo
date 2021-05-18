@@ -1,3 +1,4 @@
+import setuptools
 from Cython.Build import cythonize
 from setuptools import setup, Extension
 
@@ -18,7 +19,7 @@ with open('README.md', 'r') as fh:
 setup(
     # Information
     name='faster-fifo',
-    version='1.1.2',
+    version='1.2.0',
     url='https://github.com/alex-petrenko/faster-fifo',
     author='Aleksei Petrenko & Tushar Kumar',
     license='MIT',
@@ -31,5 +32,7 @@ setup(
     ext_modules=cythonize(extensions),
     install_requires=['setuptools>=45.2.0', 'cython>=0.29'],
     python_requires='>=3.6',
+
+    packages=setuptools.find_packages(where='./', include='faster_fifo*'),
     # install_requires=["pip>=19.3"],
 )
