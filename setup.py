@@ -8,7 +8,7 @@ extensions = [
         name='faster_fifo',
         sources=['faster_fifo.pyx', 'cpp_faster_fifo/cpp_lib/faster_fifo.cpp'],
         language='c++',
-        extra_compile_args=['-std=c++14'],
+        extra_compile_args=['-std=c++11'],
         include_dirs=['cpp_faster_fifo/cpp_lib'],
     ),
 ]
