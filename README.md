@@ -104,7 +104,7 @@ except Empty:
 
 ## Using multiprocessing.get_context('spawn')
 
-In order to use faster_fifo with 'spawn' make sure to add `import faster_fifo_reduction`. This install the custom pickler, otherwise you might get an error like this:
+In order to use faster_fifo with 'spawn' make sure to add `import faster_fifo_reduction`. This installs the custom pickler. Otherwise you might get an error like this:
 
 ```
 PicklingError: Can't pickle <class '__main__.c_ubyte_Array_2'>: attribute lookup c_ubyte_Array_2
