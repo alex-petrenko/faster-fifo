@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/alex-petrenko/faster-fifo.svg?branch=master)](https://travis-ci.org/github/alex-petrenko/faster-fifo)
+[![Build Status](https://travis-ci.com/alex-petrenko/faster-fifo.svg?branch=master)](https://travis-ci.org/github/alex-petrenko/faster-fifo)
 [![codecov](https://codecov.io/gh/alex-petrenko/faster-fifo/branch/master/graph/badge.svg)](https://codecov.io/gh/alex-petrenko/faster-fifo)
 [![Downloads](https://pepy.tech/badge/faster-fifo)](https://pepy.tech/project/faster-fifo)
 
