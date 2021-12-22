@@ -116,4 +116,17 @@ Originally designed for SampleFactory, a high-throughput asynchronous RL codebas
 
 Programmed by [Aleksei Petrenko](https://alex-petrenko.github.io/) and Tushar Kumar at [USC RESL](https://robotics.usc.edu/resl/people/).
 
-Developed under MIT License, feel free to use for any purpose, commercial or not, at your own risk ;) 
+Developed under MIT License, feel free to use for any purpose, commercial or not, at your own risk.
+
+If you wish to cite this repository:
+
+```
+@misc{faster-fifo,
+    author={Petrenko, Aleksei and Kumar, Tushar},
+    title={A Faster Alternative to Python's multiprocessing.Queue},
+    publisher={GitHub},
+    journal = {GitHub repository},
+    howpublished = {\url{https://github.com/alex-petrenko/faster-fifo}},
+    year={2020},
+}
+```
