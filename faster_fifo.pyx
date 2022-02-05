@@ -37,9 +37,15 @@ cdef size_t bytes_to_ptr(b):
 
 
 class Queue:
-    def __init__(self, max_size_bytes=DEFAULT_CIRCULAR_BUFFER_SIZE):
+    def __init__(self, max_size_bytes=DEFAULT_CIRCULAR_BUFFER_SIZE, loads=None, dumps=None):
         self.max_size_bytes = max_size_bytes
         self.max_bytes_to_read = self.max_size_bytes  # by default, read the whole queue if necessary
+
+        # allow per-instance serializer overriding
+        if loads is not None:
+            self.loads = loads
+        if dumps is not None:
+            self.dumps = dumps
 
         self.closed = multiprocessing.RawValue(ctypes.c_bool, False)
 
@@ -51,6 +57,13 @@ class Queue:
 
         self.message_buffer = None
         self.message_buffer_memview = None
+
+    # allow class level serializers
+    def loads(self, obj):
+        return _ForkingPickler.loads(obj)
+
+    def dumps(self, obj):
+        return _ForkingPickler.dumps(obj).tobytes()
 
     def close(self):
         """
@@ -68,7 +81,7 @@ class Queue:
 
     def put_many(self, xs, block=True, timeout=DEFAULT_TIMEOUT):
         assert isinstance(xs, (list, tuple))
-        xs = [_ForkingPickler.dumps(ele).tobytes() for ele in xs]
+        xs = [self.dumps(ele) for ele in xs]
 
         _len = len
         msgs_buf = (c_size_t * _len(xs))()
@@ -195,7 +208,7 @@ class Queue:
 
             msg_bytes = self.message_buffer_memview[offset:offset + msg_size.value]
             offset += msg_size.value
-            msg = _ForkingPickler.loads(msg_bytes)
+            msg = self.loads(msg_bytes)
             messages[msg_idx] = msg
 
         assert total_bytes == offset
