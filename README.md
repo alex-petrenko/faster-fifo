@@ -11,12 +11,19 @@ Completely mimics the interface of the standard multiprocessing.Queue, so can be
 
 Adds `get_many()` and `put_many()` methods to receive/send multiple messages at once for the price of a single lock.
 
+## Recent releases
+
+##### v1.3.0
+* Now support custom serializers and deserializers instead of Pickle (thank you @beasteers!):
+```Python
+q = Queue(max_size_bytes=100000, loads=custom_deserializer, dumps=custom_serializer)
+```
+
 ## Requirements 
 
 - Linux or MacOS
 - Python 3.6 or newer
 - GCC 4.9.0 or newer
-
 
 ## Installation
 
@@ -78,28 +85,28 @@ except Empty:
 
 *(measured execution times in seconds)*
 
-|                                                   | multiprocessing.Queue |    faster-fifo, get()   |  faster-fifo, get_many()  |
+|                                                   | multiprocessing.Queue |   faster-fifo, get()    |  faster-fifo, get_many()  |
 |---------------------------------------------------|:---------------------:|:-----------------------:|:-------------------------:|
-|   1 producer 1 consumer (200K msgs per producer)  |        2.54           |           0.86          |            0.92           |
-|  1 producer 10 consumers (200K msgs per producer) |        4.00           |           1.39          |            1.36           |           
-|  10 producers 1 consumer (100K msgs per producer) |       13.19           |           6.74          |            0.94           |
-| 3 producers 20 consumers (100K msgs per producer) |        9.30           |           2.22          |            2.17           |
-|  20 producers 3 consumers (50K msgs per producer) |       18.62           |           7.41          |            0.64           |
-| 20 producers 20 consumers (50K msgs per producer) |       36.51           |           1.32          |            3.79           |
+|   1 producer 1 consumer (200K msgs per producer)  |         2.54          |          0.86           |           0.92            |
+|  1 producer 10 consumers (200K msgs per producer) |         4.00          |          1.39           |           1.36            |           
+|  10 producers 1 consumer (100K msgs per producer) |         13.19         |          6.74           |           0.94            |
+| 3 producers 20 consumers (100K msgs per producer) |         9.30          |          2.22           |           2.17            |
+|  20 producers 3 consumers (50K msgs per producer) |         18.62         |          7.41           |           0.64            |
+| 20 producers 20 consumers (50K msgs per producer) |         36.51         |          1.32           |           3.79            |
 
 
 ##### System #2 (Intel(R) Core(TM) i5-4200U CPU @ 1.60GHz, 2 cores, Ubuntu 18.04)
 
 *(measured execution times in seconds)*
 
-|                                                   | multiprocessing.Queue |    faster-fifo, get()   | faster-fifo, get_many()   |
+|                                                   | multiprocessing.Queue |   faster-fifo, get()    |  faster-fifo, get_many()  |
 |---------------------------------------------------|:---------------------:|:-----------------------:|:-------------------------:|
-|   1 producer 1 consumer (200K msgs per producer)  |        7.86           |           2.09          |            2.2            |
-|  1 producer 10 consumers (200K msgs per producer) |       11.68           |           4.01          |            3.88           |           
-|  10 producers 1 consumer (100K msgs per producer) |       44.48           |          16.68          |            5.98           |
-| 3 producers 20 consumers (100K msgs per producer) |       22.59           |           7.83          |            7.49           |
-|  20 producers 3 consumers (50K msgs per producer) |       66.3            |           22.3          |            6.35           |
-| 20 producers 20 consumers (50K msgs per producer) |       78.75           |          14.39          |           15.78           |
+|   1 producer 1 consumer (200K msgs per producer)  |         7.86          |          2.09           |            2.2            |
+|  1 producer 10 consumers (200K msgs per producer) |         11.68         |          4.01           |           3.88            |           
+|  10 producers 1 consumer (100K msgs per producer) |         44.48         |          16.68          |           5.98            |
+| 3 producers 20 consumers (100K msgs per producer) |         22.59         |          7.83           |           7.49            |
+|  20 producers 3 consumers (50K msgs per producer) |         66.3          |          22.3           |           6.35            |
+| 20 producers 20 consumers (50K msgs per producer) |         78.75         |          14.39          |           15.78           |
 
 
 ## Using multiprocessing.get_context('spawn')
@@ -109,6 +116,12 @@ In order to use faster_fifo with 'spawn' make sure to add `import faster_fifo_re
 ```
 PicklingError: Can't pickle <class '__main__.c_ubyte_Array_2'>: attribute lookup c_ubyte_Array_2
 ```
+
+## Run tests
+
+`python -m unittest`
+
+(there are also C++ unit tests, should run them if C++ code was altered)
 
 ## Footnote
 

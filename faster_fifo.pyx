@@ -59,8 +59,8 @@ class Queue:
         self.message_buffer_memview = None
 
     # allow class level serializers
-    def loads(self, obj):
-        return _ForkingPickler.loads(obj)
+    def loads(self, msg_bytes):
+        return _ForkingPickler.loads(msg_bytes)
 
     def dumps(self, obj):
         return _ForkingPickler.dumps(obj).tobytes()

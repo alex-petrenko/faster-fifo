@@ -229,3 +229,22 @@ class TestSpawn(TestCase):
             p.start()
         for p in procs:
             p.join()
+
+
+# this can actually be used instead of Pickle if we know that we need to support only specific data types
+# should be significantly faster
+def custom_int_deserializer(msg_bytes):
+    return int.from_bytes(msg_bytes, 'big')
+
+
+def custom_int_serializer(x):
+    return x.to_bytes(4, 'big')
+
+
+class TestCustomSerializer(TestCase):
+    def test_custom_loads_dumps(self):
+        q = Queue(max_size_bytes=100000, loads=custom_int_deserializer, dumps=custom_int_serializer)
+        for i in range(32767):
+            q.put(i)
+            deserialized_i = q.get()
+            assert i == deserialized_i
