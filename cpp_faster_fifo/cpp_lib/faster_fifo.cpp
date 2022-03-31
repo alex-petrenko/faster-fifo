@@ -1,7 +1,6 @@
 #include <mutex>
 #include <cassert>
 #include <cstring>
-#include <iostream>
 
 #include <pthread.h>
 #include <sys/time.h>
@@ -24,11 +23,11 @@ struct Queue {
 
     ~Queue() = default;
 
-    size_t get_max_buffer_size() const {
+    [[nodiscard]] size_t get_max_buffer_size() const {
         return max_size_bytes;
     }
 
-    bool can_fit(size_t data_size) const {
+    [[nodiscard]] bool can_fit(size_t data_size) const {
         return size + data_size <= max_size_bytes;
     }
 
@@ -48,8 +47,8 @@ struct Queue {
 
         size += data_size;
 
-        assert(size <= max_size_bytes);
-        assert(tail < max_size_bytes);
+        assert(("Combined message size exceeds the size of the queue", size <= max_size_bytes));
+        assert(("Tail pointer points past the buffer boundary", tail < max_size_bytes));
     }
 
     void circular_buffer_read(uint8_t *buffer, uint8_t *data, size_t read_size, bool pop_message) {
@@ -68,8 +67,8 @@ struct Queue {
 
         const auto new_size = size - read_size;
 
-        assert(new_head < max_size_bytes);
-        assert(new_size >= 0 && new_size < max_size_bytes);
+        assert(("Circular buffer head pointer is incorrect", new_head < max_size_bytes));
+        assert(("New size is incorrect after reading from buffer", new_size >= 0 && new_size < max_size_bytes));
 
         if (pop_message) {
             head = new_head;
@@ -78,9 +77,8 @@ struct Queue {
     }
 
 public:
-    // 9 bytes is the min message size.  8 bytes for the size
-    // and 1 for the message
-    static const size_t MIN_MSG_SIZE = 9;
+    // 9 bytes is the min message size. 8 bytes for the size and 1 for the minimal message
+    static const size_t MIN_MSG_SIZE = sizeof(size_t) + 1;
     size_t max_size_bytes;
     size_t head = 0, tail = 0, size = 0;
     size_t num_elem = 0;
@@ -175,10 +173,10 @@ int queue_put(void *queue_obj, void *buffer, const void **msgs_data, const size_
 
     for (size_t i = 0; i < num_msgs; ++i) {
         // write the size to the circular buffer
-        q->circular_buffer_write((uint8_t *)buffer, reinterpret_cast<const uint8_t *>(msg_sizes + i), sizeof(size_t));
+        q->circular_buffer_write((uint8_t *)buffer, (const uint8_t *)(msg_sizes + i), sizeof(size_t));
 
         // write the message to the circular buffer
-        q->circular_buffer_write((uint8_t *)buffer, reinterpret_cast<const uint8_t *>(msgs_data[i]), msg_sizes[i]);
+        q->circular_buffer_write((uint8_t *)buffer, (const uint8_t *)(msgs_data[i]), msg_sizes[i]);
 
         // Increment count by one as one element has been added
         ++q->num_elem;
@@ -230,7 +228,7 @@ int queue_get(void *queue_obj, void *buffer,
             break;
         }
 
-        assert(q->size >= sizeof(msg_size) + msg_size);
+        assert(("Queue size is less than message size!", q->size >= sizeof(msg_size) + msg_size));
 
         // actually read the message, while also removing it from the queue
         const auto read_num_bytes = sizeof(msg_size) + msg_size;
@@ -258,7 +256,7 @@ int queue_get(void *queue_obj, void *buffer,
         pthread_cond_signal(&q->not_empty);
     }
 
-    // we managed to read as many messages as we wanted and they all fit into the buffer!
+    // we managed to read as many messages as we wanted, and they all fit into the buffer!
     return status;
 }
 
