@@ -13,6 +13,10 @@ Adds `get_many()` and `put_many()` methods to receive/send multiple messages at 
 
 ## Recent releases
 
+##### v1.3.1
+
+* Minor change: better debugging messages + improved C++ tests
+
 ##### v1.3.0
 * Now support custom serializers and deserializers instead of Pickle (thank you @beasteers!):
 ```Python
