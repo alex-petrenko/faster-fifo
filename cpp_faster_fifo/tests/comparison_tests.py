@@ -146,6 +146,8 @@ class ComparisonTestCase(TestCase):
 # Ran 1 test in 103.115s
 
 # Ubuntu 20, Python 3.9, version 1.3.1
+# For some reason (10, 1) configuration became 2x slower. This does not seem to be any kind of regression in the code
+# because it also reproduces in older versions on my new system. Seems to be caused by Python environment/Linux version/compiler?
 # [2022-03-31 02:28:18,986][549096] Configuration (1, 1, 200000), timing [ff: 1.06s, ff_many: 1.06s, mp.queue: 2.10s]
 # [2022-03-31 02:28:18,986][549096] Configuration (1, 10, 200000), timing [ff: 1.51s, ff_many: 1.52s, mp.queue: 2.96s]
 # [2022-03-31 02:28:18,986][549096] Configuration (10, 1, 100000), timing [ff: 13.10s, ff_many: 0.99s, mp.queue: 11.54s]
