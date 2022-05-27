@@ -16,6 +16,7 @@ cimport faster_fifo_def as Q
 
 DEFAULT_TIMEOUT = float(10)
 DEFAULT_CIRCULAR_BUFFER_SIZE = 1000 * 1000  # 1 Mb
+INITIAL_RECV_BUFFER_SIZE = 5000
 
 
 cdef size_t caddr(buf):
@@ -130,7 +131,7 @@ class Queue:
 
     def get_many(self, block=True, timeout=DEFAULT_TIMEOUT, max_messages_to_get=int(1e9)):
         if self.message_buffer is None:
-            self.reallocate_msg_buffer(10)  # initialize a small buffer at first, it will be increased later
+            self.reallocate_msg_buffer(INITIAL_RECV_BUFFER_SIZE)  # initialize a small buffer at first, it will be increased later if needed
 
         messages_read = ctypes.c_size_t(0)
         cdef size_t messages_read_ptr = ctypes.addressof(messages_read)
@@ -215,7 +216,7 @@ class Queue:
         return messages
 
     def reallocate_msg_buffer(self, new_size):
-        # log.info('Reallocating msg buffer size: %d', new_size)
+        new_size = max(INITIAL_RECV_BUFFER_SIZE, new_size)
         self.message_buffer = (ctypes.c_ubyte * new_size)()
         self.message_buffer_memview = memoryview(self.message_buffer)
 
