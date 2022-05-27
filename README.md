@@ -13,6 +13,10 @@ Adds `get_many()` and `put_many()` methods to receive/send multiple messages at 
 
 ## Recent releases
 
+##### v1.4.0
+
+* Increase default receive buffer size from 10 bytes to 5000 bytes.
+
 ##### v1.3.1
 
 * Minor change: better debugging messages + improved C++ tests
