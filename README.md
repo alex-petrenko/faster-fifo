@@ -15,6 +15,10 @@ Adds `get_many()` and `put_many()` methods to receive/send multiple messages at 
 
 ## Recent PyPI releases
 
+##### v1.4.2
+
+* Fixed an issue with the custom Queue pickler
+
 ##### v1.4.1
 
 * Fixed multithreading issues using threading.local for message recv buffer (huge thanks to @brianmacy!)
