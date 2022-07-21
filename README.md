@@ -13,7 +13,13 @@ Completely mimics the interface of the standard multiprocessing.Queue, so can be
 
 Adds `get_many()` and `put_many()` methods to receive/send multiple messages at once for the price of a single lock.
 
-## Recent releases
+## Recent PyPI releases
+
+##### v1.4.1
+
+* Fixed multithreading issues using threading.local for message recv buffer (huge thanks to @brianmacy!)
+* Better error reporting in Cython and C++
+* Added threading tests
 
 ##### v1.4.0
 

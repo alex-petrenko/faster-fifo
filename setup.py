@@ -31,6 +31,9 @@ setup(
     # Build instructions
     ext_modules=cythonize(extensions),
     install_requires=['setuptools>=45.2.0', 'cython>=0.29'],
+    extras_require={
+        "dev": ["twine"],
+    },
     python_requires='>=3.6',
 
     packages=setuptools.find_packages(where='./', include='faster_fifo*'),
