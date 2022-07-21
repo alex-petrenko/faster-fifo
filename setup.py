@@ -30,9 +30,13 @@ setup(
 
     # Build instructions
     ext_modules=cythonize(extensions),
-    install_requires=['setuptools>=45.2.0', 'cython>=0.29'],
+    install_requires=[
+        'setuptools>=45.2.0',
+        'cython>=0.29'
+        'numpy>=1.18.1<2.0',
+    ],
     extras_require={
-        "dev": ["twine"],
+        'dev': ['twine'],
     },
     python_requires='>=3.6',
 
