@@ -17,3 +17,8 @@ upload-test:
 
 clean:
 	rm -rf build dist faster_fifo.egg-info && rm -f *.so faster_fifo.cpp
+
+.PHONY: test
+
+test:
+	python -m unittest

@@ -1,7 +1,11 @@
 import logging
 import multiprocessing
+import threading
 from queue import Full, Empty
+from typing import Callable
 from unittest import TestCase
+
+import numpy as np
 
 from faster_fifo import Queue
 import faster_fifo_reduction
@@ -17,30 +21,29 @@ log.propagate = False  # workaround for duplicated logs in ipython
 log.addHandler(ch)
 
 MSG_SIZE = 5
-
-
-# I think we don't need this anymore (check!)
-# if sys.version_info >= (3, 8) and sys.platform == 'darwin':
-#     multiprocessing.set_start_method('fork')
+BIG_MSG_MAX_SIZE = int(1e7)
 
 
 def make_msg(msg_idx):
     return (msg_idx,) * MSG_SIZE
 
 
-def produce(q, p_idx, num_messages):
+def make_big_msg(msg_idx):
+    rand_size = np.random.randint(1, min((msg_idx + 1) * 1000, BIG_MSG_MAX_SIZE))
+    return np.empty(rand_size, dtype=np.uint8)
+
+
+def produce(q, p_idx, num_messages, make_msg_fn: Callable = make_msg):
     i = 0
     while i < num_messages:
         try:
-            q.put(make_msg(i), timeout=0.01)
+            q.put(make_msg_fn(i), timeout=0.01)
             if i % 50000 == 0:
                 log.info('Produce: %d %d', i, p_idx)
             i += 1
         except Full:
             # time.sleep(0.001)
             pass
-        except Exception as exc:
-            log.exception(exc)
     log.info('Done! %d', p_idx)
 
 
@@ -58,8 +61,6 @@ def consume(q, p_idx, consume_many, total_num_messages=int(1e9)):
         except Empty:
             if q.is_closed():
                 break
-        except Exception as exc:
-            log.exception(exc)
     log.info('Done! %d', p_idx)
 
 
@@ -69,17 +70,21 @@ class TestFastQueue(TestCase):
         produce(q, 0, num_messages=20)
         consume(q, 0, consume_many=2, total_num_messages=20)
         q.close()
+        self.assertIsNone(q.last_error)
 
-    def test_multiproc(self):
+    def run_producer_consumer(
+            self, n_producers: int, n_consumers: int, n_msg: int, execution_medium: type,
+            make_msg_fn: Callable,
+    ):
         q = Queue()
         consume_many = 1000
         producers = []
         consumers = []
-        for j in range(20):
-            p = multiprocessing.Process(target=produce, args=(q, j, 1000001))
+        for j in range(n_producers):
+            p = execution_medium(target=produce, args=(q, j, n_msg, make_msg_fn))
             producers.append(p)
-        for j in range(3):
-            p = multiprocessing.Process(target=consume, args=(q, j, consume_many))
+        for j in range(n_consumers):
+            p = execution_medium(target=consume, args=(q, j, consume_many))
             consumers.append(p)
         for c in consumers:
             c.start()
@@ -90,7 +95,29 @@ class TestFastQueue(TestCase):
         q.close()
         for c in consumers:
             c.join()
+
+        self.assertIsNone(q.last_error)
         log.info('Exit...')
+
+    def test_multiprocessing(self):
+        self.run_producer_consumer(
+            20, 3, 100001, execution_medium=multiprocessing.Process, make_msg_fn=make_msg,
+        )
+
+    def test_multithreading(self):
+        self.run_producer_consumer(
+            20, 3, 100001, execution_medium=threading.Thread, make_msg_fn=make_msg,
+        )
+
+    def test_multiprocessing_big_msg(self):
+        self.run_producer_consumer(
+            20, 3, 1001, execution_medium=multiprocessing.Process, make_msg_fn=make_big_msg,
+        )
+
+    def test_multithreading_big_msg(self):
+        self.run_producer_consumer(
+            20, 20, 101, execution_medium=threading.Thread, make_msg_fn=make_big_msg,
+        )
 
     def test_msg(self):
         q = Queue(max_size_bytes=1000)

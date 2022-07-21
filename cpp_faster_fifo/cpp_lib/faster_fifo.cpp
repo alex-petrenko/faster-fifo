@@ -8,6 +8,14 @@
 #include "faster_fifo.hpp"
 
 
+// Logs the error message to stderr and in debug mode triggers assert if the condition is false.
+#define LOG_ASSERT(cond, msg) \
+    if (!(cond)) { \
+        fprintf(stderr, "%s:%d %s\n", __FILE__, __LINE__, (msg)); \
+        assert(((msg), (cond))); \
+    }
+
+
 struct Queue {
     explicit Queue(size_t max_size_bytes) : max_size_bytes(max_size_bytes) {
         pthread_mutexattr_init(&mutex_attr);
@@ -47,8 +55,8 @@ struct Queue {
 
         size += data_size;
 
-        assert(("Combined message size exceeds the size of the queue", size <= max_size_bytes));
-        assert(("Tail pointer points past the buffer boundary", tail < max_size_bytes));
+        LOG_ASSERT(size <= max_size_bytes, "Combined message size exceeds the size of the queue");
+        LOG_ASSERT(tail < max_size_bytes, "Tail pointer points past the buffer boundary");
     }
 
     void circular_buffer_read(uint8_t *buffer, uint8_t *data, size_t read_size, bool pop_message) {
@@ -67,8 +75,8 @@ struct Queue {
 
         const auto new_size = size - read_size;
 
-        assert(("Circular buffer head pointer is incorrect", new_head < max_size_bytes));
-        assert(("New size is incorrect after reading from buffer", new_size >= 0 && new_size < max_size_bytes));
+        LOG_ASSERT(new_head < max_size_bytes, "Circular buffer head pointer is incorrect");
+        LOG_ASSERT(new_size >= 0 && new_size < max_size_bytes, "New size is incorrect after reading from buffer");
 
         if (pop_message) {
             head = new_head;
@@ -228,7 +236,7 @@ int queue_get(void *queue_obj, void *buffer,
             break;
         }
 
-        assert(("Queue size is less than message size!", q->size >= sizeof(msg_size) + msg_size));
+        LOG_ASSERT(q->size >= sizeof(msg_size) + msg_size, "Queue size is less than message size!");
 
         // actually read the message, while also removing it from the queue
         const auto read_num_bytes = sizeof(msg_size) + msg_size;

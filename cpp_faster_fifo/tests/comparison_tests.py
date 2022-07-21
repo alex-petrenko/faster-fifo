@@ -156,6 +156,15 @@ class ComparisonTestCase(TestCase):
 # [2022-03-31 02:28:18,987][549096] Configuration (20, 20, 50000), timing [ff: 1.33s, ff_many: 3.91s, mp.queue: 21.46s]
 # Ran 1 test in 105.765s
 
+# Ubuntu 20, Python 3.8, version 1.4.1
+# [2022-07-21 01:32:09,831][2374340] Configuration (1, 1, 200000), timing [ff: 1.13s, ff_many: 1.10s, mp.queue: 2.20s]
+# [2022-07-21 01:32:09,831][2374340] Configuration (1, 10, 200000), timing [ff: 1.72s, ff_many: 1.69s, mp.queue: 3.51s]
+# [2022-07-21 01:32:09,831][2374340] Configuration (10, 1, 100000), timing [ff: 13.71s, ff_many: 1.28s, mp.queue: 12.16s]
+# [2022-07-21 01:32:09,831][2374340] Configuration (3, 20, 100000), timing [ff: 3.18s, ff_many: 2.29s, mp.queue: 7.81s]
+# [2022-07-21 01:32:09,831][2374340] Configuration (20, 3, 50000), timing [ff: 15.47s, ff_many: 0.75s, mp.queue: 17.52s]
+# [2022-07-21 01:32:09,831][2374340] Configuration (20, 20, 50000), timing [ff: 1.26s, ff_many: 3.74s, mp.queue: 27.82s]
+# Ran 1 test in 118.350s
+
 
 # i5-4200U (dual-core CPU)
 # [2020-05-22 18:03:55,061][09146] Configuration (1, 1, 200000), timing [ff: 2.09s, ff_many: 2.20s, mp.queue: 7.86s]
