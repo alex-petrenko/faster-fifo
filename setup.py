@@ -33,10 +33,9 @@ setup(
     install_requires=[
         'setuptools>=45.2.0',
         'cython>=0.29'
-        'numpy>=1.18.1<2.0',
     ],
     extras_require={
-        'dev': ['twine'],
+        'dev': ['twine', 'numpy>=1.18.1<2.0'],
     },
     python_requires='>=3.6',
 
