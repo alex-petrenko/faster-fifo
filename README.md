@@ -49,6 +49,8 @@ q = Queue(max_size_bytes=100000, loads=custom_deserializer, dumps=custom_seriali
 
 ```pip install faster-fifo```
 
+(on a fresh Linux installation you might need some basic compiling tools `sudo apt-get install --reinstall build-essential`)
+
 ## Manual build instructions
 
 ```
