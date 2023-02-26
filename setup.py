@@ -35,7 +35,7 @@ setup(
         'cython>=0.29'
     ],
     extras_require={
-        'dev': ['twine', 'numpy>=1.18.1<2.0'],
+        'dev': ['twine', 'numpy>=1.18.1,<2.0'],
     },
     python_requires='>=3.6',
 
