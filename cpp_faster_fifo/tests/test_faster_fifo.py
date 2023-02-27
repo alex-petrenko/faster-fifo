@@ -275,3 +275,19 @@ class TestCustomSerializer(TestCase):
             q.put(i)
             deserialized_i = q.get()
             assert i == deserialized_i
+
+
+class SubQueue(Queue):
+    pass
+
+
+def worker(_x: Queue):
+    pass
+
+
+class TestSubclass(TestCase):
+    def test_subclass(self):
+        q = SubQueue()  # Works with Queue()
+        pool = multiprocessing.Pool(2, initializer=worker, initargs=(q, ))
+        pool.close()
+        pool.join()
