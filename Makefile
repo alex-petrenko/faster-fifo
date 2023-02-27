@@ -1,7 +1,7 @@
 .PHONY: build
 
 build: setup.py
-	python3 setup.py sdist
+	python setup.py build_ext --inplace && python3 setup.py sdist
 
 .PHONY: upload
 

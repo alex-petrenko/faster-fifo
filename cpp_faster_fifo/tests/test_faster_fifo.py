@@ -8,7 +8,6 @@ from unittest import TestCase
 import numpy as np
 
 from faster_fifo import Queue
-import faster_fifo_reduction
 
 
 ch = logging.StreamHandler()
@@ -281,13 +280,22 @@ class SubQueue(Queue):
     pass
 
 
-def worker(_x: Queue):
+def worker_test_subclass(_x: Queue, _y: Queue):
     pass
 
 
 class TestSubclass(TestCase):
     def test_subclass(self):
-        q = SubQueue()  # Works with Queue()
-        pool = multiprocessing.Pool(2, initializer=worker, initargs=(q, ))
+        ctx = multiprocessing.get_context('spawn')
+
+        q = Queue()
+        q.put(1)
+        q.get()
+        qs = SubQueue()  # Works with Queue()
+        qs.put(2)
+        qs.get()
+
+        from multiprocessing.pool import Pool as MpPool
+        pool = MpPool(2, initializer=worker_test_subclass, initargs=(q, qs), context=ctx)
         pool.close()
         pool.join()

@@ -30,6 +30,13 @@ class TLSBuffer(threading.local):
     def __init__(self, v):
         self.val = v
 
+    def __getstate__(self):
+        message_buffer_size = 0 if self.val is None else len(self.val)
+        return message_buffer_size
+
+    def __setstate__(self, message_buffer_size):
+        self.val = (ctypes.c_ubyte * message_buffer_size)()
+
 
 cdef size_t caddr(buf):
     cdef size_t buffer_ptr = ctypes.addressof(buf)

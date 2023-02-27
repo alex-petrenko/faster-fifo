@@ -13,32 +13,6 @@ Completely mimics the interface of the standard multiprocessing.Queue, so can be
 
 Adds `get_many()` and `put_many()` methods to receive/send multiple messages at once for the price of a single lock.
 
-## Recent PyPI releases
-
-##### v1.4.2
-
-* Fixed an issue with the custom Queue pickler
-
-##### v1.4.1
-
-* Fixed multithreading issues using threading.local for message recv buffer (huge thanks to @brianmacy!)
-* Better error reporting in Cython and C++
-* Added threading tests
-
-##### v1.4.0
-
-* Increase default receive buffer size from 10 bytes to 5000 bytes.
-
-##### v1.3.1
-
-* Minor change: better debugging messages + improved C++ tests
-
-##### v1.3.0
-* Now support custom serializers and deserializers instead of Pickle (thank you @beasteers!):
-```Python
-q = Queue(max_size_bytes=100000, loads=custom_deserializer, dumps=custom_serializer)
-```
-
 ## Requirements 
 
 - Linux or MacOS
@@ -49,7 +23,7 @@ q = Queue(max_size_bytes=100000, loads=custom_deserializer, dumps=custom_seriali
 
 ```pip install faster-fifo```
 
-(on a fresh Linux installation you might need some basic compiling tools `sudo apt-get install --reinstall build-essential`)
+(on a fresh Linux installation you might need some basic compiling tools `sudo apt install --reinstall build-essential`)
 
 ## Manual build instructions
 
@@ -63,7 +37,6 @@ pip install -e .
 
 ```Python
 from faster_fifo import Queue
-import faster_fifo_reduction
 from queue import Full, Empty
 
 q = Queue(1000 * 1000)  # specify the size of the circular buffer in the ctor
@@ -130,20 +103,41 @@ except Empty:
 |  20 producers 3 consumers (50K msgs per producer) |         66.3          |          22.3           |           6.35            |
 | 20 producers 20 consumers (50K msgs per producer) |         78.75         |          14.39          |           15.78           |
 
-
-## Using multiprocessing.get_context('spawn')
-
-In order to use faster_fifo with 'spawn' make sure to add `import faster_fifo_reduction`. This installs the custom pickler. Otherwise you might get an error like this:
-
-```
-PicklingError: Can't pickle <class '__main__.c_ubyte_Array_2'>: attribute lookup c_ubyte_Array_2
-```
-
 ## Run tests
 
 `python -m unittest`
 
 (there are also C++ unit tests, should run them if C++ code was altered)
+
+## Recent PyPI releases
+
+##### v1.4.3 (pending release)
+
+* Simplified usage with "spawn" multiprocessing context. No need to use `faster_fifo_reduction` anymore.
+
+##### v1.4.2
+
+* Fixed an issue with the custom Queue pickler
+
+##### v1.4.1
+
+* Fixed multithreading issues using threading.local for message recv buffer (huge thanks to @brianmacy!)
+* Better error reporting in Cython and C++
+* Added threading tests
+
+##### v1.4.0
+
+* Increase default receive buffer size from 10 bytes to 5000 bytes.
+
+##### v1.3.1
+
+* Minor change: better debugging messages + improved C++ tests
+
+##### v1.3.0
+* Now support custom serializers and deserializers instead of Pickle (thank you @beasteers!):
+```Python
+q = Queue(max_size_bytes=100000, loads=custom_deserializer, dumps=custom_serializer)
+```
 
 ## Footnote
 
