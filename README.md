@@ -111,9 +111,9 @@ except Empty:
 
 ## Recent PyPI releases
 
-##### v1.4.3 (pending release)
+##### v1.4.3
 
-* Simplified usage with "spawn" multiprocessing context. No need to use `faster_fifo_reduction` anymore.
+* Simplified usage with "spawn" multiprocessing context. No need to use `faster_fifo_reduction` anymore. Thank you [@MosBas](https://github.com/MosBas)!
 
 ##### v1.4.2
 
@@ -121,7 +121,7 @@ except Empty:
 
 ##### v1.4.1
 
-* Fixed multithreading issues using threading.local for message recv buffer (huge thanks to @brianmacy!)
+* Fixed multithreading issues using threading.local for message recv buffer (huge thanks to [@brianmacy](https://github.com/brianmacy)!)
 * Better error reporting in Cython and C++
 * Added threading tests
 
@@ -134,7 +134,7 @@ except Empty:
 * Minor change: better debugging messages + improved C++ tests
 
 ##### v1.3.0
-* Now support custom serializers and deserializers instead of Pickle (thank you @beasteers!):
+* Now support custom serializers and deserializers instead of Pickle (thank you [@beasteers](https://github.com/beasteers)!):
 ```Python
 q = Queue(max_size_bytes=100000, loads=custom_deserializer, dumps=custom_serializer)
 ```
