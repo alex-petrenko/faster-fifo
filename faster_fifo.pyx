@@ -27,7 +27,7 @@ class QueueError(Exception):
 
 class TLSBuffer(threading.local):
     """Used for recv message buffers, prevents race condition in multithreading (not a problem with multiprocessing)."""
-    def __init__(self, v):
+    def __init__(self, v=None):
         self.val = v
 
     def __getstate__(self):
@@ -35,7 +35,10 @@ class TLSBuffer(threading.local):
         return message_buffer_size
 
     def __setstate__(self, message_buffer_size):
-        self.val = (ctypes.c_ubyte * message_buffer_size)()
+        if message_buffer_size == 0:
+            self.val = None
+        else:
+            self.val = (ctypes.c_ubyte * message_buffer_size)()
 
 
 cdef size_t caddr(buf):

@@ -111,6 +111,10 @@ except Empty:
 
 ## Recent PyPI releases
 
+##### v1.4.4
+
+* Fixed an obscure issue with the TLSBuffer ctor being called without arguments (guessing it's Cython's weirdness)
+
 ##### v1.4.3
 
 * Simplified usage with "spawn" multiprocessing context. No need to use `faster_fifo_reduction` anymore. Thank you [@MosBas](https://github.com/MosBas)!
