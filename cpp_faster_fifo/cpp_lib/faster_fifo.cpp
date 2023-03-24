@@ -273,6 +273,11 @@ size_t get_queue_size(void *queue_obj) {
     return q->num_elem;
 }
 
+size_t get_data_size(void *queue_obj) {
+    auto q = (Queue *)queue_obj;
+    return q->size;
+}
+
 bool is_queue_full(void *queue_obj) {
     auto q = (Queue *)queue_obj;
     constexpr size_t min_message_size = 1;
