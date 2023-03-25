@@ -111,6 +111,10 @@ except Empty:
 
 ## Recent PyPI releases
 
+##### v1.4.5
+
+* Added method `data_size()` to query the total size of the messages in queue (in bytes). Thank you [@LucaNicosia](https://github.com/LucaNicosia)!
+
 ##### v1.4.4
 
 * Fixed an obscure issue with the TLSBuffer ctor being called without arguments (guessing it's Cython's weirdness)
