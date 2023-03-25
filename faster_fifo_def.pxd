@@ -13,4 +13,5 @@ cdef extern from 'cpp_faster_fifo/cpp_lib/faster_fifo.hpp':
                   size_t max_messages_to_get, size_t max_bytes_to_get,
                   size_t *messages_read, size_t *bytes_read, size_t *messages_size, int block, float timeout) nogil;
     size_t get_queue_size(void *queue_obj);
+    size_t get_data_size(void *queue_obj);
     bool is_queue_full(void *queue_obj);

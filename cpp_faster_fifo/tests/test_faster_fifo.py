@@ -171,6 +171,15 @@ class TestFastQueue(TestCase):
         q_empty = q.empty()
         self.assertFalse(q_empty)
 
+    def test_queue_data_size(self):
+        q = Queue(max_size_bytes=1000)
+        py_obj = dict(a=10, b=20)
+        q.put_nowait(py_obj)
+        py_obj_size = q.data_size()
+        log.debug('Queue data size after put -  %d', py_obj_size)
+        q.put_nowait(py_obj)
+        self.assertTrue(q.data_size(), 2*py_obj_size)
+
     def test_queue_full(self):
         q = Queue(max_size_bytes=60)
         self.assertFalse(q.full())

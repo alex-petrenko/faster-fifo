@@ -253,6 +253,9 @@ class Queue:
     def qsize(self):
         return Q.get_queue_size(<void *>q_addr(self))
 
+    def data_size(self):
+        return Q.get_data_size(<void *>q_addr(self))
+
     def empty(self):
         """
         Return True if the queue is empty, False otherwise. 
