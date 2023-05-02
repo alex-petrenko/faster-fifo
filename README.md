@@ -23,7 +23,7 @@ Adds `get_many()` and `put_many()` methods to receive/send multiple messages at 
 
 ```pip install faster-fifo```
 
-(on a fresh Linux installation you might need some basic compiling tools `sudo apt install --reinstall build-essential`)
+(on a fresh Linux installation you might need some basic compiling tools `sudo apt install --reinstall build-essential gcc g++`)
 
 ## Manual build instructions
 
