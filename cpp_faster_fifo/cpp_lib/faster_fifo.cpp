@@ -7,6 +7,8 @@
 
 #include "faster_fifo.hpp"
 
+#include <stdio.h>
+
 
 // Logs the error message to stderr and in debug mode triggers assert if the condition is false.
 #define LOG_ASSERT(cond, msg) \
