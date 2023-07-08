@@ -223,7 +223,77 @@ class TestFastQueue(TestCase):
             q.get(timeout=0.1)
             assert True, 'This won\'t be called'
         except Empty:
-            log.debug('Queue is empty')
+            log.debug("Queue is empty")
+
+    def test_max_size(self):
+        q = Queue(
+            max_size_bytes=1000, max_size=5
+        )  # Create a queue with a maximum of 5 messages
+
+        for i in range(5):
+            q.put_nowait(make_msg(i))  # Add 5 messages to the queue
+
+        q_size_bef = q.qsize()
+        log.debug("Queue size after put -  %d", q_size_bef)
+
+        self.assertTrue(q.full())  # Check that the queue is full
+
+        with self.assertRaises(
+            Full
+        ):  # Check that adding another message raises the Full exception
+            q.put_nowait(make_msg(5))
+        q.get_many()
+        self.assertFalse(q.full())  # Check that the queue is not full
+
+    def test_queue_full_msgs(self):
+        q = Queue(max_size=5)
+        self.assertFalse(q.full())
+        py_obj = (1, 2)
+        for _ in range(5):
+            q.put_nowait(py_obj)
+        self.assertTrue(q.full())
+        with self.assertRaises(Full):
+            q.put_nowait(py_obj)
+
+    def test_producer_consumer_msgs(self):
+        self.run_producer_consumer_msgs(
+            1,
+            1,
+            10,
+            threading.Thread,
+            make_msg,
+        )
+
+    def run_producer_consumer_msgs(
+        self,
+        n_producers: int,
+        n_consumers: int,
+        n_msg: int,
+        execution_medium: type,
+        make_msg_fn: Callable,
+    ):
+        q = Queue(max_size=n_msg * n_producers)
+        consume_many = 5
+        producers = []
+        consumers = []
+        for j in range(n_producers):
+            p = execution_medium(target=produce, args=(q, j, n_msg, make_msg_fn))
+            producers.append(p)
+        for j in range(n_consumers):
+            p = execution_medium(target=consume, args=(q, j, consume_many))
+            consumers.append(p)
+        for c in consumers:
+            c.start()
+        for p in producers:
+            p.start()
+        for p in producers:
+            p.join()
+        q.close()
+        for c in consumers:
+            c.join()
+
+        self.assertIsNone(q.last_error)
+        log.info("Exit...")
 
 
 def spawn_producer(data_q_):

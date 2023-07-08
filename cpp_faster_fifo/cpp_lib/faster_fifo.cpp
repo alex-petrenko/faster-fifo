@@ -19,7 +19,7 @@
 
 
 struct Queue {
-    explicit Queue(size_t max_size_bytes) : max_size_bytes(max_size_bytes) {
+    explicit Queue(size_t max_size_bytes, size_t max_size) : max_size_bytes(max_size_bytes), max_size(max_size) {
         pthread_mutexattr_init(&mutex_attr);
         pthread_mutexattr_setpshared(&mutex_attr, PTHREAD_PROCESS_SHARED);
         pthread_mutex_init(&mutex, &mutex_attr);
@@ -37,8 +37,17 @@ struct Queue {
         return max_size_bytes;
     }
 
-    [[nodiscard]] bool can_fit(size_t data_size) const {
-        return size + data_size <= max_size_bytes;
+    [[nodiscard]] size_t get_max_size() const {
+        return max_size;
+    }
+
+    [[nodiscard]] bool can_fit(size_t data_size, size_t additional_size) const {
+        bool cond_size;
+        bool cond_num;
+        cond_size = size + data_size <= max_size_bytes;
+        cond_num = num_elem + additional_size <= max_size;
+
+        return cond_size && cond_num;
     }
 
     /// This function does not check if there is enough space in the circular buffer, assuming the check
@@ -78,7 +87,7 @@ struct Queue {
         const auto new_size = size - read_size;
 
         LOG_ASSERT(new_head < max_size_bytes, "Circular buffer head pointer is incorrect");
-        LOG_ASSERT(new_size >= 0 && new_size < max_size_bytes, "New size is incorrect after reading from buffer");
+        LOG_ASSERT(new_size >= 0 && new_size <= max_size_bytes, "New size is incorrect after reading from buffer");
 
         if (pop_message) {
             head = new_head;
@@ -90,6 +99,7 @@ public:
     // 9 bytes is the min message size. 8 bytes for the size and 1 for the minimal message
     static const size_t MIN_MSG_SIZE = sizeof(size_t) + 1;
     size_t max_size_bytes;
+    size_t max_size;
     size_t head = 0, tail = 0, size = 0;
     size_t num_elem = 0;
 
@@ -120,8 +130,8 @@ size_t queue_object_size() {
     return sizeof(Queue);
 }
 
-void create_queue(void *queue_obj_memory, size_t max_size_bytes) {
-    new(queue_obj_memory) Queue(max_size_bytes);  // placement new
+void create_queue(void *queue_obj_memory, size_t max_size_bytes, size_t max_size) {
+    new(queue_obj_memory) Queue(max_size_bytes, max_size);  // placement new
 }
 
 struct timeval float_seconds_to_timeval(float seconds) {
@@ -162,6 +172,9 @@ bool timer_positive(const struct timeval &timer) {
 int queue_put(void *queue_obj, void *buffer, const void **msgs_data, const size_t *msg_sizes, const size_t num_msgs, const int block, const float timeout) {
     auto q = (Queue *)queue_obj;
     LockGuard lock(&q->mutex);
+    if (get_queue_size(q) >= q->get_max_size()) {
+        return Q_FULL;
+    }
 
     {
         size_t total_size = num_msgs * sizeof(size_t);
@@ -169,7 +182,8 @@ int queue_put(void *queue_obj, void *buffer, const void **msgs_data, const size_
             total_size += msg_sizes[i];
 
         auto wait_remaining = float_seconds_to_timeval(timeout);
-        while (!q->can_fit(total_size)) {
+        while (!q->can_fit(total_size, num_msgs)) {
+            
             if (!block || !timer_positive(wait_remaining))
                 return Q_FULL;
 
@@ -194,7 +208,7 @@ int queue_put(void *queue_obj, void *buffer, const void **msgs_data, const size_
     
     if (q->not_empty_n_waiters > 0)
         pthread_cond_signal(&q->not_empty);
-    else if (q->not_full_n_waiters && q->can_fit(Queue::MIN_MSG_SIZE)) {
+    else if (q->not_full_n_waiters && q->can_fit(Queue::MIN_MSG_SIZE, 1)) {
         // In the case of many producers and one batched consumer, producers
         // should wake each other up as the batched consumer is only guaranteed to
         // wake up 1 producer its pthread_cond_signal(&q->not_full).
@@ -283,5 +297,6 @@ size_t get_data_size(void *queue_obj) {
 bool is_queue_full(void *queue_obj) {
     auto q = (Queue *)queue_obj;
     constexpr size_t min_message_size = 1;
-    return !q->can_fit(min_message_size + sizeof(min_message_size));
+    constexpr size_t min_messages_count = 1;
+    return !q->can_fit(min_message_size + sizeof(min_message_size), min_messages_count);
 }

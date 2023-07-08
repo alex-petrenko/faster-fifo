@@ -60,8 +60,9 @@ cdef size_t bytes_to_ptr(b):
 
 
 class Queue:
-    def __init__(self, max_size_bytes=DEFAULT_CIRCULAR_BUFFER_SIZE, loads=None, dumps=None):
+    def __init__(self, max_size_bytes=DEFAULT_CIRCULAR_BUFFER_SIZE, max_size=int(1e9), loads=None, dumps=None):
         self.max_size_bytes = max_size_bytes
+        self.max_size = max_size  # default max_size
         self.max_bytes_to_read = self.max_size_bytes  # by default, read the whole queue if necessary
 
         # allow per-instance serializer overriding
@@ -76,7 +77,7 @@ class Queue:
         self.queue_obj_buffer = multiprocessing.RawArray(ctypes.c_ubyte, queue_obj_size)
         self.shared_memory = multiprocessing.RawArray(ctypes.c_ubyte, max_size_bytes)
 
-        Q.create_queue(<void *> q_addr(self), max_size_bytes)
+        Q.create_queue(<void *> q_addr(self), max_size_bytes, max_size)
 
         self.message_buffer: TLSBuffer = TLSBuffer(None)
 
@@ -150,7 +151,9 @@ class Queue:
             raise Exception(f'Unexpected queue error {status}')
 
     def put(self, x, block=True, timeout=DEFAULT_TIMEOUT):
-        return self.put_many([x], block, timeout)
+        status = self.put_many([x], block, timeout)
+        if status == Q.Q_FULL:
+            raise Full()
 
     def put_many_nowait(self, xs):
         return self.put_many(xs, block=False)
