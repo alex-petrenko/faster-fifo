@@ -60,9 +60,9 @@ cdef size_t bytes_to_ptr(b):
 
 
 class Queue:
-    def __init__(self, max_size_bytes=DEFAULT_CIRCULAR_BUFFER_SIZE, max_size=int(1e9), loads=None, dumps=None):
+    def __init__(self, max_size_bytes=DEFAULT_CIRCULAR_BUFFER_SIZE, maxsize=int(1e9), loads=None, dumps=None):
         self.max_size_bytes = max_size_bytes
-        self.max_size = max_size  # default max_size
+        self.maxsize = maxsize  # default maxsize
         self.max_bytes_to_read = self.max_size_bytes  # by default, read the whole queue if necessary
 
         # allow per-instance serializer overriding
@@ -77,7 +77,7 @@ class Queue:
         self.queue_obj_buffer = multiprocessing.RawArray(ctypes.c_ubyte, queue_obj_size)
         self.shared_memory = multiprocessing.RawArray(ctypes.c_ubyte, max_size_bytes)
 
-        Q.create_queue(<void *> q_addr(self), max_size_bytes, max_size)
+        Q.create_queue(<void *> q_addr(self), max_size_bytes, maxsize)
 
         self.message_buffer: TLSBuffer = TLSBuffer(None)
 

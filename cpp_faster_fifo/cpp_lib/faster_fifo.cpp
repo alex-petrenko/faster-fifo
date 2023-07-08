@@ -19,7 +19,7 @@
 
 
 struct Queue {
-    explicit Queue(size_t max_size_bytes, size_t max_size) : max_size_bytes(max_size_bytes), max_size(max_size) {
+    explicit Queue(size_t max_size_bytes, size_t maxsize) : max_size_bytes(max_size_bytes), maxsize(maxsize) {
         pthread_mutexattr_init(&mutex_attr);
         pthread_mutexattr_setpshared(&mutex_attr, PTHREAD_PROCESS_SHARED);
         pthread_mutex_init(&mutex, &mutex_attr);
@@ -38,14 +38,14 @@ struct Queue {
     }
 
     [[nodiscard]] size_t get_max_size() const {
-        return max_size;
+        return maxsize;
     }
 
     [[nodiscard]] bool can_fit(size_t data_size, size_t additional_size) const {
         bool cond_size;
         bool cond_num;
         cond_size = size + data_size <= max_size_bytes;
-        cond_num = num_elem + additional_size <= max_size;
+        cond_num = num_elem + additional_size <= maxsize;
 
         return cond_size && cond_num;
     }
@@ -99,7 +99,7 @@ public:
     // 9 bytes is the min message size. 8 bytes for the size and 1 for the minimal message
     static const size_t MIN_MSG_SIZE = sizeof(size_t) + 1;
     size_t max_size_bytes;
-    size_t max_size;
+    size_t maxsize;
     size_t head = 0, tail = 0, size = 0;
     size_t num_elem = 0;
 
@@ -130,8 +130,8 @@ size_t queue_object_size() {
     return sizeof(Queue);
 }
 
-void create_queue(void *queue_obj_memory, size_t max_size_bytes, size_t max_size) {
-    new(queue_obj_memory) Queue(max_size_bytes, max_size);  // placement new
+void create_queue(void *queue_obj_memory, size_t max_size_bytes, size_t maxsize) {
+    new(queue_obj_memory) Queue(max_size_bytes, maxsize); 
 }
 
 struct timeval float_seconds_to_timeval(float seconds) {
