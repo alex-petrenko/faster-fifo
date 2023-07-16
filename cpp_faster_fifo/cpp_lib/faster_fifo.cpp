@@ -41,14 +41,12 @@ struct Queue {
         return maxsize;
     }
 
-    [[nodiscard]] bool can_fit(size_t data_size, size_t additional_size) const {
-        bool cond_size;
-        bool cond_num;
-        cond_size = size + data_size <= max_size_bytes;
-        cond_num = num_elem + additional_size <= maxsize;
+[[nodiscard]] bool can_fit(size_t data_size, size_t additional_size) const {
+    const bool cond_size = size + data_size <= max_size_bytes;
+    const bool cond_num = num_elem + additional_size <= maxsize;
 
-        return cond_size && cond_num;
-    }
+    return cond_size && cond_num;
+}
 
     /// This function does not check if there is enough space in the circular buffer, assuming the check
     /// has been performed.
@@ -172,9 +170,6 @@ bool timer_positive(const struct timeval &timer) {
 int queue_put(void *queue_obj, void *buffer, const void **msgs_data, const size_t *msg_sizes, const size_t num_msgs, const int block, const float timeout) {
     auto q = (Queue *)queue_obj;
     LockGuard lock(&q->mutex);
-    if (get_queue_size(q) >= q->get_max_size()) {
-        return Q_FULL;
-    }
 
     {
         size_t total_size = num_msgs * sizeof(size_t);
