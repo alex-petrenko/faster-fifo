@@ -154,12 +154,20 @@ class Queue:
         status = self.put_many([x], block, timeout)
         if status == Q.Q_FULL:
             raise Full()
+        return status
 
     def put_many_nowait(self, xs):
-        return self.put_many(xs, block=False)
+        status = self.put_many(xs, block=False)
+        if status == Q.Q_FULL:
+            raise Full()
+        return status
 
     def put_nowait(self, x):
-        return self.put_many_nowait([x])
+        status = self.put_many_nowait([x])
+        if status == Q.Q_FULL:
+            raise Full()
+        return status
+
 
     def get_many(self, block=True, timeout=DEFAULT_TIMEOUT, max_messages_to_get=int(1e9)):
         if self.message_buffer.val is None:
