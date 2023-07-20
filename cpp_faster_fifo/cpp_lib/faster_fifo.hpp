@@ -8,7 +8,7 @@ constexpr int Q_SUCCESS = 0,
 
 
 size_t queue_object_size();
-void create_queue(void *queue_obj, size_t max_size_bytes);
+void create_queue(void *queue_obj, size_t max_size_bytes, size_t maxsize);
 
 int queue_put(void *queue_obj, void *buffer, const void **msgs_data, const size_t *msg_sizes, size_t num_msgs, int block, float timeout);
 

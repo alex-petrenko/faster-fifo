@@ -13,7 +13,7 @@ from faster_fifo import Queue
 ch = logging.StreamHandler()
 ch.setLevel(logging.DEBUG)
 
-log = logging.getLogger('rl')
+log = logging.getLogger("rl")
 log.setLevel(logging.DEBUG)
 log.handlers = []  # No duplicated handlers
 log.propagate = False  # workaround for duplicated logs in ipython
@@ -38,12 +38,12 @@ def produce(q, p_idx, num_messages, make_msg_fn: Callable = make_msg):
         try:
             q.put(make_msg_fn(i), timeout=0.01)
             if i % 50000 == 0:
-                log.info('Produce: %d %d', i, p_idx)
+                log.info("Produce: %d %d", i, p_idx)
             i += 1
         except Full:
             # time.sleep(0.001)
             pass
-    log.info('Done! %d', p_idx)
+    log.info("Done! %d", p_idx)
 
 
 def consume(q, p_idx, consume_many, total_num_messages=int(1e9)):
@@ -54,13 +54,13 @@ def consume(q, p_idx, consume_many, total_num_messages=int(1e9)):
             for msg in msgs:
                 messages_received += 1
                 if msg[0] % 50000 == 0:
-                    log.info('Consume: %r %d num_msgs: %d', msg, p_idx, len(msgs))
+                    log.info("Consume: %r %d num_msgs: %d", msg, p_idx, len(msgs))
             if messages_received >= total_num_messages:
                 break
         except Empty:
             if q.is_closed():
                 break
-    log.info('Done! %d', p_idx)
+    log.info("Done! %d", p_idx)
 
 
 class TestFastQueue(TestCase):
@@ -72,8 +72,12 @@ class TestFastQueue(TestCase):
         self.assertIsNone(q.last_error)
 
     def run_producer_consumer(
-            self, n_producers: int, n_consumers: int, n_msg: int, execution_medium: type,
-            make_msg_fn: Callable,
+        self,
+        n_producers: int,
+        n_consumers: int,
+        n_msg: int,
+        execution_medium: type,
+        make_msg_fn: Callable,
     ):
         q = Queue()
         consume_many = 1000
@@ -96,48 +100,67 @@ class TestFastQueue(TestCase):
             c.join()
 
         self.assertIsNone(q.last_error)
-        log.info('Exit...')
+        log.info("Exit...")
 
     def test_multiprocessing(self):
         self.run_producer_consumer(
-            20, 3, 100001, execution_medium=multiprocessing.Process, make_msg_fn=make_msg,
+            20,
+            3,
+            100001,
+            execution_medium=multiprocessing.Process,
+            make_msg_fn=make_msg,
         )
 
     def test_multithreading(self):
         self.run_producer_consumer(
-            20, 3, 100001, execution_medium=threading.Thread, make_msg_fn=make_msg,
+            20,
+            3,
+            100001,
+            execution_medium=threading.Thread,
+            make_msg_fn=make_msg,
         )
 
     def test_multiprocessing_big_msg(self):
         self.run_producer_consumer(
-            20, 3, 1001, execution_medium=multiprocessing.Process, make_msg_fn=make_big_msg,
+            20,
+            3,
+            1001,
+            execution_medium=multiprocessing.Process,
+            make_msg_fn=make_big_msg,
         )
 
     def test_multithreading_big_msg(self):
         self.run_producer_consumer(
-            20, 20, 101, execution_medium=threading.Thread, make_msg_fn=make_big_msg,
+            20,
+            20,
+            101,
+            execution_medium=threading.Thread,
+            make_msg_fn=make_big_msg,
         )
 
     def test_msg(self):
         q = Queue(max_size_bytes=1000)
 
-        py_obj = dict(a=42, b=33, c=(1, 2, 3), d=[1, 2, 3], e='123', f=b'kkk')
+        py_obj = dict(a=42, b=33, c=(1, 2, 3), d=[1, 2, 3], e="123", f=b"kkk")
         q.put_nowait(py_obj)
         res = q.get_nowait()
-        log.debug('got object %r', res)
+        log.debug("got object %r", res)
         self.assertEqual(py_obj, res)
 
     def test_msg_many(self):
         q = Queue(max_size_bytes=100000)
 
-        py_objs = [dict(a=42, b=33, c=(1, 2, 3), d=[1, 2, 3], e='123', f=b'kkk') for _ in range(5)]
+        py_objs = [
+            dict(a=42, b=33, c=(1, 2, 3), d=[1, 2, 3], e="123", f=b"kkk")
+            for _ in range(5)
+        ]
         q.put_many_nowait(py_objs)
         res = q.get_many_nowait()
 
         while not q.empty():
             res.extend(q.get_many_nowait())
 
-        log.debug('Got object %r', res)
+        log.debug("Got object %r", res)
         self.assertEqual(py_objs, res)
 
         q.put_nowait(py_objs)
@@ -151,7 +174,7 @@ class TestFastQueue(TestCase):
         q.put_nowait(py_obj_1)
         q.put_nowait(py_obj_2)
         q_size_bef = q.qsize()
-        log.debug('Queue size after put -  %d', q_size_bef)
+        log.debug("Queue size after put -  %d", q_size_bef)
         num_messages = 0
         want_to_read = 2
         while num_messages < want_to_read:
@@ -160,13 +183,13 @@ class TestFastQueue(TestCase):
             num_messages += len(msgs)
         self.assertEqual(type(q_size_bef), int)
         q_size_af = q.qsize()
-        log.debug('Queue size after get -  %d', q_size_af)
+        log.debug("Queue size after get -  %d", q_size_af)
         self.assertEqual(q_size_af, 0)
 
     def test_queue_empty(self):
         q = Queue(max_size_bytes=1000)
         self.assertTrue(q.empty())
-        py_obj = dict(a=42, b=33, c=(1, 2, 3), d=[1, 2, 3], e='123', f=b'kkk')
+        py_obj = dict(a=42, b=33, c=(1, 2, 3), d=[1, 2, 3], e="123", f=b"kkk")
         q.put_nowait(py_obj)
         q_empty = q.empty()
         self.assertFalse(q_empty)
@@ -176,9 +199,9 @@ class TestFastQueue(TestCase):
         py_obj = dict(a=10, b=20)
         q.put_nowait(py_obj)
         py_obj_size = q.data_size()
-        log.debug('Queue data size after put -  %d', py_obj_size)
+        log.debug("Queue data size after put -  %d", py_obj_size)
         q.put_nowait(py_obj)
-        self.assertTrue(q.data_size(), 2*py_obj_size)
+        self.assertTrue(q.data_size(), 2 * py_obj_size)
 
     def test_queue_full(self):
         q = Queue(max_size_bytes=60)
@@ -195,7 +218,7 @@ class TestFastQueue(TestCase):
         q = Queue(1000 * 1000)  # specify the size of the circular buffer in the ctor
 
         # any pickle-able Python object can be added to the queue
-        py_obj = dict(a=42, b=33, c=(1, 2, 3), d=[1, 2, 3], e='123', f=b'kkk')
+        py_obj = dict(a=42, b=33, c=(1, 2, 3), d=[1, 2, 3], e="123", f=b"kkk")
         q.put(py_obj)
         assert q.qsize() == 1
 
@@ -207,7 +230,7 @@ class TestFastQueue(TestCase):
             try:
                 q.put(py_obj, timeout=0.1)
             except Full:
-                log.debug('Queue is full!')
+                log.debug("Queue is full!")
 
         num_received = 0
         while num_received < 100:
@@ -221,9 +244,79 @@ class TestFastQueue(TestCase):
 
         try:
             q.get(timeout=0.1)
-            assert True, 'This won\'t be called'
+            assert True, "This won't be called"
         except Empty:
-            log.debug('Queue is empty')
+            log.debug("Queue is empty")
+
+    def test_max_size(self):
+        q = Queue(
+            max_size_bytes=1000, maxsize=5
+        )  # Create a queue with a maximum of 5 messages
+
+        for i in range(5):
+            q.put_nowait(make_msg(i))  # Add 5 messages to the queue
+
+        q_size_bef = q.qsize()
+        log.debug("Queue size after put -  %d", q_size_bef)
+
+        self.assertTrue(q.full())  # Check that the queue is full
+
+        with self.assertRaises(
+            Full
+        ):  # Check that adding another message raises the Full exception
+            q.put_nowait(make_msg(5))
+        q.get_many()
+        self.assertFalse(q.full())  # Check that the queue is not full
+
+    def test_queue_full_msgs(self):
+        q = Queue(maxsize=5)
+        self.assertFalse(q.full())
+        py_obj = (1, 2)
+        for _ in range(5):
+            q.put_nowait(py_obj)
+        self.assertTrue(q.full())
+        with self.assertRaises(Full):
+            q.put_nowait(py_obj)
+
+    def test_producer_consumer_msgs(self):
+        self.run_producer_consumer_msgs(
+            1,
+            1,
+            10,
+            threading.Thread,
+            make_msg,
+        )
+
+    def run_producer_consumer_msgs(
+        self,
+        n_producers: int,
+        n_consumers: int,
+        n_msg: int,
+        execution_medium: type,
+        make_msg_fn: Callable,
+    ):
+        q = Queue(maxsize=n_msg * n_producers)
+        consume_many = 5
+        producers = []
+        consumers = []
+        for j in range(n_producers):
+            p = execution_medium(target=produce, args=(q, j, n_msg, make_msg_fn))
+            producers.append(p)
+        for j in range(n_consumers):
+            p = execution_medium(target=consume, args=(q, j, consume_many))
+            consumers.append(p)
+        for c in consumers:
+            c.start()
+        for p in producers:
+            p.start()
+        for p in producers:
+            p.join()
+        q.close()
+        for c in consumers:
+            c.join()
+
+        self.assertIsNone(q.last_error)
+        log.info("Exit...")
 
 
 def spawn_producer(data_q_):
@@ -240,17 +333,15 @@ def spawn_consumer(data_q_):
             print(data)
             i += 1
         except Empty:
-            print('Read', i, 'messages')
+            print("Read", i, "messages")
             break
 
 
 class TestSpawn(TestCase):
     def test_spawn_ctx(self):
-        ctx = multiprocessing.get_context('spawn')
+        ctx = multiprocessing.get_context("spawn")
         data_q = Queue(1000 * 1000)
-        procs = [
-            ctx.Process(target=spawn_producer, args=(data_q,)) for _ in range(2)
-        ]
+        procs = [ctx.Process(target=spawn_producer, args=(data_q,)) for _ in range(2)]
         procs.append(ctx.Process(target=spawn_consumer, args=(data_q,)))
 
         # add data to the queue and read some of it back to make sure all buffers are initialized before
@@ -269,16 +360,20 @@ class TestSpawn(TestCase):
 # this can actually be used instead of Pickle if we know that we need to support only specific data types
 # should be significantly faster
 def custom_int_deserializer(msg_bytes):
-    return int.from_bytes(msg_bytes, 'big')
+    return int.from_bytes(msg_bytes, "big")
 
 
 def custom_int_serializer(x):
-    return x.to_bytes(4, 'big')
+    return x.to_bytes(4, "big")
 
 
 class TestCustomSerializer(TestCase):
     def test_custom_loads_dumps(self):
-        q = Queue(max_size_bytes=100000, loads=custom_int_deserializer, dumps=custom_int_serializer)
+        q = Queue(
+            max_size_bytes=100000,
+            loads=custom_int_deserializer,
+            dumps=custom_int_serializer,
+        )
         for i in range(32767):
             q.put(i)
             deserialized_i = q.get()
@@ -295,7 +390,7 @@ def worker_test_subclass(_x: Queue, _y: Queue):
 
 class TestSubclass(TestCase):
     def test_subclass(self):
-        ctx = multiprocessing.get_context('spawn')
+        ctx = multiprocessing.get_context("spawn")
 
         q = Queue()
         q.put(1)
@@ -305,6 +400,9 @@ class TestSubclass(TestCase):
         qs.get()
 
         from multiprocessing.pool import Pool as MpPool
-        pool = MpPool(2, initializer=worker_test_subclass, initargs=(q, qs), context=ctx)
+
+        pool = MpPool(
+            2, initializer=worker_test_subclass, initargs=(q, qs), context=ctx
+        )
         pool.close()
         pool.join()
