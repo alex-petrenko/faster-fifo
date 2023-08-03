@@ -39,6 +39,6 @@ setup(
     },
     python_requires='>=3.6',
 
-    packages=setuptools.find_packages(where='./', include='faster_fifo*'),
+    packages=setuptools.find_packages(where='.', include='faster_fifo*'),
     # install_requires=["pip>=19.3"],
 )
