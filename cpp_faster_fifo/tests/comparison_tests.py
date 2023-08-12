@@ -173,3 +173,23 @@ class ComparisonTestCase(TestCase):
 # [2020-05-22 18:03:55,061][09146] Configuration (3, 20, 100000), timing [ff: 7.83s, ff_many: 7.49s, mp.queue: 22.59s]
 # [2020-05-22 18:03:55,061][09146] Configuration (20, 3, 50000), timing [ff: 22.30s, ff_many: 6.35s, mp.queue: 66.30s]
 # [2020-05-22 18:03:55,061][09146] Configuration (20, 20, 50000), timing [ff: 14.39s, ff_many: 15.78s, mp.queue: 78.75s]
+
+
+# Update (2023.08.11)
+# Ubuntu 18, Intel(R) Xeon(R) CPU E5-2650, Python 3.9.16
+# [2023-08-11 17:37:58,796][40648] Configuration (1, 1, 200000), timing [ff: 2.28s, ff_many: 2.46s, mp.queue: 3.48s]
+# [2023-08-11 17:37:58,796][40648] Configuration (1, 10, 200000), timing [ff: 2.71s, ff_many: 2.82s, mp.queue: 11.65s]
+# [2023-08-11 17:37:58,796][40648] Configuration (10, 1, 100000), timing [ff: 13.69s, ff_many: 1.95s, mp.queue: 18.39s]
+# [2023-08-11 17:37:58,796][40648] Configuration (3, 20, 100000), timing [ff: 2.97s, ff_many: 2.30s, mp.queue: 21.10s]
+# [2023-08-11 17:37:58,796][40648] Configuration (20, 3, 50000), timing [ff: 19.75s, ff_many: 1.08s, mp.queue: 23.24s]
+# [2023-08-11 17:37:58,796][40648] Configuration (20, 20, 50000), timing [ff: 2.81s, ff_many: 3.73s, mp.queue: 70.49s]
+# Ran 1 test in 206.923s
+
+# Ubuntu 18, Intel(R) Xeon(R) CPU E5-2650, Python 3.11.4
+# [2023-08-11 17:46:36,056][42634] Configuration (1, 1, 200000), timing [ff: 1.67s, ff_many: 1.77s, mp.queue: 2.45s]
+# [2023-08-11 17:46:36,056][42634] Configuration (1, 10, 200000), timing [ff: 2.27s, ff_many: 2.31s, mp.queue: 5.61s]
+# [2023-08-11 17:46:36,056][42634] Configuration (10, 1, 100000), timing [ff: 13.15s, ff_many: 1.86s, mp.queue: 14.05s]
+# [2023-08-11 17:46:36,056][42634] Configuration (3, 20, 100000), timing [ff: 2.97s, ff_many: 2.23s, mp.queue: 12.71s]
+# [2023-08-11 17:46:36,056][42634] Configuration (20, 3, 50000), timing [ff: 19.22s, ff_many: 0.99s, mp.queue: 17.28s]
+# [2023-08-11 17:46:36,056][42634] Configuration (20, 20, 50000), timing [ff: 2.60s, ff_many: 3.52s, mp.queue: 43.30s]
+# Ran 1 test in 149.972s
