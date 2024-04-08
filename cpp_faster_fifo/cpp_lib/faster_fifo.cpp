@@ -1,6 +1,7 @@
 #include <mutex>
 #include <cassert>
 #include <cstring>
+#include <cstdio>
 
 #include <pthread.h>
 #include <sys/time.h>
