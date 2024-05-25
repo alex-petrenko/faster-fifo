@@ -105,7 +105,10 @@ except Empty:
 
 ## Run tests
 
-`python -m unittest`
+```
+pip install numpy
+python -m unittest
+```
 
 (there are also C++ unit tests, should run them if C++ code was altered)
 
