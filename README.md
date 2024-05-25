@@ -111,6 +111,10 @@ except Empty:
 
 ## Recent PyPI releases
 
+##### v1.4.6
+
+* Added missing `<cstdio>` causing issues with newer g++. Thank you [mesaglio](https://github.com/mesaglio)!
+
 ##### v1.4.5
 
 * Added method `data_size()` to query the total size of the messages in queue (in bytes). Thank you [@LucaNicosia](https://github.com/LucaNicosia)!
