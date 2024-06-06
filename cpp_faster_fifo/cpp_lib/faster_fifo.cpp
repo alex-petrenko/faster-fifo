@@ -1,3 +1,4 @@
+#include <new>
 #include <mutex>
 #include <cassert>
 #include <cstring>
