@@ -19,7 +19,7 @@ with open('README.md', 'r') as fh:
 setup(
     # Information
     name='faster-fifo',
-    version='1.4.6',
+    version='1.4.7',
     url='https://github.com/alex-petrenko/faster-fifo',
     author='Aleksei Petrenko & Tushar Kumar',
     license='MIT',
