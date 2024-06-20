@@ -114,6 +114,10 @@ python -m unittest
 
 ## Recent PyPI releases
 
+##### v1.4.7
+
+* Added missing `<new>` header. Thank you [mxilinas](https://github.com/mxilinas)!
+
 ##### v1.4.6
 
 * Added missing `<cstdio>` causing issues with newer g++. Thank you [mesaglio](https://github.com/mesaglio)!
