@@ -4,10 +4,10 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "faster-fifo"
-version = "1.4.7"
+version = "1.5.0"
 description = "A faster alternative to Python's standard multiprocessing.Queue (IPC FIFO queue)"
 readme = {file = "README.md", content-type = "text/markdown"}
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 license = {text = "MIT"}
 authors = [
     {name = "Aleksei Petrenko"},
@@ -30,3 +30,7 @@ include = ["faster_fifo*"]
 
 [tool.cython]
 language_level = 3
+
+[tool.cibuildwheel]
+# Skip CPython 3.6, CPython 3.7, and CPython 3.8
+skip = ["cp36-*", "cp37-*", "cp38-*"]
