@@ -33,4 +33,5 @@ language_level = 3
 
 [tool.cibuildwheel]
 # Skip CPython 3.6, CPython 3.7, and CPython 3.8
-skip = ["cp36-*", "cp37-*", "cp38-*"]
+# Also skip PyPy on all Python versions because of setuptools bug
+skip = ["cp36-*", "cp37-*", "cp38-*", "pp*"]
