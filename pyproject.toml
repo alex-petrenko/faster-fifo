@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "faster-fifo"
-version = "1.5.0"
+version = "1.5.2"
 description = "A faster alternative to Python's standard multiprocessing.Queue (IPC FIFO queue)"
 readme = {file = "README.md", content-type = "text/markdown"}
 requires-python = ">=3.9"
