@@ -115,7 +115,7 @@ python -m unittest
 
 ##### v1.5.0
 
-* Build/publish binary wheels with cibuildwheel by [zbowling](https://github.com/zbowling)
+* Build/publish binary wheels with cibuildwheel. Thank you [zbowling](https://github.com/zbowling)!
 
 ##### v1.4.7
 
