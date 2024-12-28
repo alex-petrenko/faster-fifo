@@ -113,7 +113,7 @@ python -m unittest
 
 ## Recent PyPI releases
 
-##### v1.5.1
+##### v1.5.2
 
 * Fixing some dependencies and distribution issues
 
