@@ -113,6 +113,10 @@ python -m unittest
 
 ## Recent PyPI releases
 
+##### v1.5.1
+
+* Fixing some dependencies and distribution issues
+
 ##### v1.5.0
 
 * Build/publish binary wheels with cibuildwheel. Thank you [zbowling](https://github.com/zbowling)!
