@@ -1,3 +1,37 @@
 [build-system]
-requires = ["setuptools", "wheel", "Cython"]
+requires = ["setuptools>=75.6.0", "wheel", "cython>=0.29"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "faster-fifo"
+version = "1.5.0"
+description = "A faster alternative to Python's standard multiprocessing.Queue (IPC FIFO queue)"
+readme = {file = "README.md", content-type = "text/markdown"}
+requires-python = ">=3.9"
+license = {text = "MIT"}
+authors = [
+    {name = "Aleksei Petrenko"},
+    {name = "Tushar Kumar"}
+]
+keywords = ["multiprocessing", "data structures"]
+urls = { homepage = "https://github.com/alex-petrenko/faster-fifo" }
+
+[project.optional-dependencies]
+dev = ["twine", "numpy>=1.18.1,<2.0"]
+
+[tool.setuptools]
+ext-modules = [
+    { name='faster_fifo', sources=['faster_fifo.pyx', 'cpp_faster_fifo/cpp_lib/faster_fifo.cpp'], language='c++', extra-compile-args=['-std=c++11'], include-dirs=['cpp_faster_fifo/cpp_lib']}
+]
+
+[tool.setuptools.packages.find]
+where = ["./"]
+include = ["faster_fifo*"]
+
+[tool.cython]
+language_level = 3
+
+[tool.cibuildwheel]
+# Skip CPython 3.6, CPython 3.7, and CPython 3.8
+# Also skip PyPy on all Python versions because of setuptools bug
+skip = ["cp36-*", "cp37-*", "cp38-*", "pp*"]
