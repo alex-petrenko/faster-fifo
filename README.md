@@ -9,7 +9,6 @@
 Faster alternative to Python's standard multiprocessing.Queue (IPC FIFO queue). Up to 30x faster in some configurations.
 
 Implemented in C++ using POSIX mutexes with PTHREAD_PROCESS_SHARED attribute. Based on a circular buffer, low footprint, brokerless.
-Completely mimics the interface of the standard multiprocessing.Queue, so can be used as a drop-in replacement.
 
 Adds `get_many()` and `put_many()` methods to receive/send multiple messages at once for the price of a single lock.
 
