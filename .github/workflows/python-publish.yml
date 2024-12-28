@@ -63,5 +63,6 @@ jobs:
 
       - name: Publish to Pypi
         uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          repository-url: https://test.pypi.org/legacy/
+        # uncomment this for testing the PyPI upload
+        # with:
+        #   repository-url: https://test.pypi.org/legacy/
