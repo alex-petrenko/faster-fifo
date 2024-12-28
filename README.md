@@ -114,6 +114,10 @@ python -m unittest
 
 ## Recent PyPI releases
 
+##### v1.5.0
+
+* Build/publish binary wheels with cibuildwheel by [zbowling](https://github.com/zbowling)
+
 ##### v1.4.7
 
 * Added missing `<new>` header. Thank you [mxilinas](https://github.com/mxilinas)!
