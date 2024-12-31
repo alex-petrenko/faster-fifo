@@ -1,4 +1,4 @@
-[![tests](https://github.com/alex-petrenko/faster-fifo/actions/workflows/test-ci.yml/badge.svg)](https://github.com/alex-petrenko/faster-fifo/actions/workflows/test-ci.yml)
+[![tests](https://github.com/alex-petrenko/faster-fifo/actions/workflows/test-ci.yml/badge.svg?branch=master)](https://github.com/alex-petrenko/faster-fifo/actions/workflows/test-ci.yml)
 [![Downloads](https://pepy.tech/badge/faster-fifo)](https://pepy.tech/project/faster-fifo)
 [<img src="https://img.shields.io/discord/987232982798598164?label=discord">](https://discord.gg/d9VZmMWejh)
 
